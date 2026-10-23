@@ -1,0 +1,6 @@
+{
+  "luci-app-faketraffic": {
+    "description": "Read FakeTraffic engine service state",
+    "read": { "ubus": { "service": [ "list" ] } }
+  }
+}

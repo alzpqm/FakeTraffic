@@ -1,0 +1,19 @@
+{
+	"luci-app-fakesip": {
+		"description": "Grant access to FakeSIP configuration and service controls",
+		"read": {
+			"file": {
+				"/etc/init.d/fakesip status": [ "exec" ]
+			},
+			"uci": [ "fakesip" ]
+		},
+		"write": {
+			"file": {
+				"/etc/init.d/fakesip start": [ "exec" ],
+				"/etc/init.d/fakesip stop": [ "exec" ],
+				"/etc/init.d/fakesip restart": [ "exec" ]
+			},
+			"uci": [ "fakesip" ]
+		}
+	}
+}
