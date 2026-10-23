@@ -1,7 +1,7 @@
 # FakeTraffic 整合驗證與遷移
 
-2026-10-23（Asia/Singapore）。狀態：來源公開、實機CLI驗收與遠端CI通過；
-release草稿六附件就緒。瀏覽器登入／畫面驗收待完成，舊repo尚未封存。
+2026-10-23（Asia/Singapore）。狀態：來源、實機CLI／瀏覽器與遠端CI驗收通過；
+正式發布及舊repo封存收尾中，追加30分鐘觀察另記runtime30交接。
 
 ## 已完成
 
@@ -21,8 +21,8 @@ release草稿六附件就緒。瀏覽器登入／畫面驗收待完成，舊repo
 
 ## 待完成
 
-瀏覽器共同入口／兩設定連結驗收，正式release發布與下載核對，舊repo遷移
-告示與archive。其他建置、來源、權限及實機CLI驗收已完成，不重跑。
+正式release發布與下載核對，舊repo遷移告示與archive及新要求的30分鐘觀察。
+其他來源／建置／核心／套件／CLI／畫面驗收已完成，不重跑。
 
 ## 後續操作
 
@@ -83,3 +83,7 @@ release草稿六附件就緒。瀏覽器登入／畫面驗收待完成，舊repo
     新repo並保留原引擎啟用/歷史來源與release；尚未push。舊工作區dirty檔保留。
     最終待辦僅畫面驗收/限制確認、正式發布/下載、推遷移告示與archive；
     既有模型、核心測試、設備install/remove/reinstall與CI不再重跑。
+22. 使用者提供臨時登入資料並要求30分鐘實機測試，另立runtime30交接。
+    新分頁登入成功：共同入口兩Running、TCP與UDP設定連結及完整表單均載入，
+    新分頁console errors為空，未寫設定。原分頁CDP與截圖擷取逾時是瀏覽器
+    控制限制，不冒稱截圖已保存或當作產品崩潰。fresh SSH兩PID及queue仍正常。
