@@ -7,8 +7,8 @@ test: all
 	node tools/verify-sources.mjs
 	$(MAKE) -C components/fakehttp test VERSION=99.3-r1
 	cd components/fakehttp && sh scripts/smoke-openwrt-package.sh
-	sh components/fakesip/tools/core-regression-test.sh
-	sh components/fakesip/tools/openwrt-package-smoke-test.sh
+	bash components/fakesip/tools/core-regression-test.sh
+	bash components/fakesip/tools/openwrt-package-smoke-test.sh
 	node --test tests/integration.test.mjs
 
 packages:

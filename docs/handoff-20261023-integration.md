@@ -62,3 +62,8 @@ APK建置與extract/依賴驗收、目標系統共同入口安裝及回退、匿
     `ccb76725dbe37c170250c655213d6d8b7d7f0a9b03fabdcb3e34a707cfe330d4`。
     其他四APK是同來源重建，原二進位相同但封裝metadata/timestamp不同；
     沒有重新安裝四核心/LuCI或假稱所有附件都逐包重裝。
+17. 新repo以匿名Codex/local.invalid建立及推送。初次遠端CI的HTTP全部通過，
+    在Ubuntu dash執行SIP Bash/pipefail腳本時失敗；本機sh行為差異先前未揭露。
+    修正共同Makefile明確用bash，原component檔案不變，後續CI另記結果。
+    初始source import的兩份.clang-format各有一行既有trailing whitespace；
+    保留精確來源，不為格式修改已鎖定檔案。新整合檔案另核對。
