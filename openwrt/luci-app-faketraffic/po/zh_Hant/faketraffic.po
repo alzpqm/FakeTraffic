@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: zh_Hant\n"
+
+msgid "TCP — General"
+msgstr "TCP — 一般設定"
+
+msgid "TCP — Payloads"
+msgstr "TCP — 偽裝內容"
+
+msgid "TCP — Advanced"
+msgstr "TCP — 進階設定"
+
+msgid "UDP — Configuration"
+msgstr "UDP — 設定"
+
+msgid "FakeTraffic service"
+msgstr "FakeTraffic 服務"
+
+msgid "Configure TCP and UDP here. One service, one configuration and one Save & Apply. Packet engines remain independent internal components."
+msgstr "在此統一設定 TCP 與 UDP，共用一個服務、一份設定與儲存套用流程。封包引擎保留為獨立的內部元件。"
+
+msgid "TCP and UDP must use different NFQUEUE numbers."
+msgstr "TCP 與 UDP 必須使用不同的 NFQUEUE 編號。"
+
+msgid "Command submitted. Check actual TCP/UDP states below; unsaved settings are not applied."
+msgstr "已送出服務指令，請以下方 TCP／UDP 實際狀態為準；尚未儲存的設定不會套用。"
+
+msgid "Service command failed"
+msgstr "服務指令執行失敗"

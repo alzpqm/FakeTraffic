@@ -1,5 +1,43 @@
 # 遷移與回復
 
+## 0.2.0統一產品版（開發／未驗收）
+
+新版只需要核心 `faketraffic` 與介面 `luci-app-faketraffic`，依賴系統套件
+由APK解析。兩個引擎安裝到專屬的 `/usr/libexec/faketraffic/`，不覆寫舊
+`/usr/bin/`；單一 `/etc/init.d/faketraffic` 管理tcp/udp兩實例，讀取
+`/etc/config/faketraffic`。不是兩個舊LuCI頁面的跳轉入口。
+
+全新設備在核對SHA256、架構及系統相容性後，一次安裝兩包，再於共同介面
+設定與啟用TCP/UDP；安裝不自動啟動，預設兩引擎停用。只需管理一個服務。
+
+```sh
+apk add --simulate --allow-untrusted ./faketraffic-0.2.0-r1.apk ./luci-app-faketraffic-0.2.0-r1.apk
+# 確認交易後移除 --simulate 執行；不要使用 force-overwrite。
+```
+
+既有設備不得直接開啟新舊服務並行。保守遷移順序：
+
+1. 私人root0700位置備份world、套件版本、原設定與服務啟用／運行狀態、
+   離線回復用舊APK；確認沒有待套用UCI變更。
+2. `tools/prepare-migration.sh`僅產生私人候選合併設定，不改正式UCI或服務。
+   保留HTTP globals/advanced/payload及UDP main；遇到同名main或額外SIP
+   section就拒絕，不靜默丟掉設定。審核語義／argv及原檔CAS後才可繼續。
+3. 安裝新兩包不覆寫舊檔、不自動啟動。顯式停止及停用舊兩服務，確認PID、
+   queue owner與舊表已退；再以候選檔建立新UCI並啟用新服務。這是會短暫
+   停止偽裝的生命週期切換，不聲稱零中斷；不重啟網路或flush全域防火牆。
+4. 驗證兩實例argv（除binary路徑外）、原UCI未變、queue/drop、連線探針、
+   真正LuCI儲存／套用及回復流程。未驗前保留停用的舊核心以便回復。
+5. 新版驗收通過後，預覽移除舊四套件，只允許這四包，不得自動清理其他
+   系統依賴。原私人設定備份與APK保留，不刪歷史來源或GitHub release。
+
+回復須先停用／停止新服務，確認兩實例已退，再恢復原服務狀態與原介面
+APK。原設定不應被遷移修改；如需恢復任何檔案，先做CAS避免覆蓋使用者
+期間修改。失敗後只恢復引擎、未恢復介面時，必須明列部分回復，不能稱完成。
+
+以下保留的是0.1.0歷史流程，不能用於新版：
+
+## 0.1.0歷史：唯讀入口
+
 FakeTraffic 0.1.0 的維護範圍已合併；執行時仍使用兩個獨立引擎。套件名稱、
 UCI 檔、nft 表及預設 queue 不變。不要刪除或停用 `fakehttp` / `fakesip`，
 它們現在是 FakeTraffic 的元件，不是待清理的殘留。
