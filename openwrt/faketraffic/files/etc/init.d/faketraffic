@@ -405,5 +405,57 @@ service_triggers() {
     config_list_foreach globals interface add_network_trigger
     config_list_foreach main network add_network_trigger
 }
-# No custom reload_service: rc.common submits instance definitions to procd,
-# which compares argv and preserves an unchanged engine.
+# Reload re-submits definitions, so procd can preserve an unchanged engine.
+
+# ubus running:true can precede exec and the engine's TERM handler. Starting
+# and immediately stopping in that interval can lose TERM on this target.
+# Only inspect our own service/PIDs; do not signal or wait on other services.
+wait_instance_ready() {
+    local tries=0 stable=0 previous= pids pid exe caught blocked ready reply service="${1:-faketraffic}" required="${2:-0}" tcp_wanted=0 udp_wanted=0 tcp_pid udp_pid pause=sleep max_tries=5
+    case "$service" in *[!A-Za-z0-9_]*|'') return 1;; esac
+    if command -v usleep >/dev/null 2>&1; then pause=usleep; max_tries=50; fi
+    if [ "$required" -eq 1 ]; then
+        config_get_bool tcp_wanted globals enabled 0
+        config_get_bool udp_wanted main enabled 0
+    fi
+    while [ "$tries" -lt "$max_tries" ]; do
+        reply="$(ubus call service list "{\"name\":\"$service\"}" 2>/dev/null)" || return 1
+        pids="$(printf '%s' "$reply" | jsonfilter -e "@.$service.instances.*.pid" 2>/dev/null)"
+        ready=1
+        if [ "$required" -eq 1 ]; then
+            tcp_pid="$(printf '%s' "$reply" | jsonfilter -e "@.$service.instances.tcp.pid" 2>/dev/null)"
+            udp_pid="$(printf '%s' "$reply" | jsonfilter -e "@.$service.instances.udp.pid" 2>/dev/null)"
+            if [ "$tcp_wanted" -eq 1 ]; then [ -n "$tcp_pid" ] || ready=0; else [ -z "$tcp_pid" ] || ready=0; fi
+            if [ "$udp_wanted" -eq 1 ]; then [ -n "$udp_pid" ] || ready=0; else [ -z "$udp_pid" ] || ready=0; fi
+        elif [ -z "$pids" ]; then
+            return 0
+        fi
+        for pid in $pids; do
+            case "$pid" in *[!0-9]*|'') ready=0; continue;; esac
+            exe="$(readlink "/proc/$pid/exe" 2>/dev/null)"
+            case "$exe" in /usr/libexec/faketraffic/fakehttp|/usr/libexec/faketraffic/fakesip) ;; *) ready=0; continue;; esac
+            caught="$(awk '$1 == "SigCgt:" { print $2 }' "/proc/$pid/status" 2>/dev/null)"
+            blocked="$(awk '$1 == "SigBlk:" { print $2 }' "/proc/$pid/status" 2>/dev/null)"
+            case "$caught:$blocked" in *[!0-9a-fA-F:]*|:*|*:) ready=0; continue;; esac
+            [ "$((0x$caught & 16384))" -ne 0 ] && [ "$((0x$blocked & 16384))" -eq 0 ] || ready=0
+        done
+        if [ "$ready" -eq 1 ] && [ "$pids" = "$previous" ]; then
+            stable=$((stable + 1))
+            [ "$stable" -ge 2 ] && return 0
+        else
+            stable=0
+        fi
+        previous="$pids"
+        tries=$((tries + 1))
+        if [ "$pause" = usleep ]; then usleep 100000 || return 1; else sleep 1 || return 1; fi
+    done
+    logger -t faketraffic "instance readiness timed out; not confirmed healthy"
+    return 1
+}
+
+service_started() { config_load faketraffic; wait_instance_ready faketraffic 1; }
+stop_service() { wait_instance_ready || return 0; }
+reload_service() {
+    wait_instance_ready || return 1
+    start
+}
