@@ -1,6 +1,7 @@
 # FakeTraffic 整合驗證與遷移
 
-2026-10-23（Asia/Singapore）。狀態：使用者已要求繼續完成，執行驗證中。
+2026-10-23（Asia/Singapore）。狀態：來源公開、實機CLI驗收與遠端CI通過；
+release草稿六附件就緒。瀏覽器登入／畫面驗收待完成，舊repo尚未封存。
 
 ## 已完成
 
@@ -20,8 +21,8 @@
 
 ## 待完成
 
-APK建置與extract/依賴驗收、目標系統共同入口安裝及回退、匿名發布、舊repo
-遷移告示與archive。尚未完成項不得描述為成功。
+瀏覽器共同入口／兩設定連結驗收，正式release發布與下載核對，舊repo遷移
+告示與archive。其他建置、來源、權限及實機CLI驗收已完成，不重跑。
 
 ## 後續操作
 
@@ -67,3 +68,18 @@ APK建置與extract/依賴驗收、目標系統共同入口安裝及回退、匿
     修正共同Makefile明確用bash，原component檔案不變，後續CI另記結果。
     初始source import的兩份.clang-format各有一行既有trailing whitespace；
     保留精確來源，不為格式修改已鎖定檔案。新整合檔案另核對。
+18. 修正commit `0ff76c5dc546ce6cbfaf2a1c103a39c7f684dc9a` 遠端CI通過：
+    https://github.com/alzpqm/FakeTraffic/actions/runs/39932524817 。
+    初始import commit `4a47ce66bd4d44e80be408da1906cb61d091aa50` 及後續提交
+    作者/提交者均Codex <codex@local.invalid>。156個staged檔掃描私人pattern為0，
+    136個import blob hash再次核對，18個原/新腳本執行權限按Git tree保留。
+19. release草稿已上傳五APK與SHA256SUMS，六項server SHA256全部匹配，未設
+    為公開。manifest SHA256 `f862dab76f7c62d000874842f072dc588732074258b1b6bf2adeecd271e84f2a`。
+    source為本repo，不上傳私人備份/raw、舊Sol內部索引或測試二進位。
+20. 使用者回覆已登入後，指定Chrome重新載入仍是需要授權；先定位確認只有
+    該一個可見LuCI分頁，並請使用者確認指定origin或接受明列未驗畫面限制。
+    不能僅憑使用者已登入回覆就冒稱畫面實測成功。
+21. 兩個舊repo已分別在乾淨公開checkout準備只改README的匿名commit，指向
+    新repo並保留原引擎啟用/歷史來源與release；尚未push。舊工作區dirty檔保留。
+    最終待辦僅畫面驗收/限制確認、正式發布/下載、推遷移告示與archive；
+    既有模型、核心測試、設備install/remove/reinstall與CI不再重跑。
