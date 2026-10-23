@@ -1,17 +1,18 @@
 # FakeTraffic
 
-FakeHTTP（TCP）與 FakeSIP（UDP）的共同維護專案，提供共同建置與 LuCI 管理入口。
-0.1.0 保留兩套獨立的 NFQUEUE 引擎、服務及設定頁；共同入口只顯示狀態與設定連結。
+OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設定，由同一個服務管理。
+0.2.0 使用 NFQUEUE，核心套件內含 TCP 與 UDP 引擎，不必另裝兩套舊服務。
 
-| 元件 | 版本 |
-| --- | --- |
-| FakeHTTP／LuCI | 99.3-r1 |
-| FakeSIP／LuCI | 0.9.1-r23 |
-| FakeTraffic LuCI 入口 | 0.1.0-r1 |
+## 套件與使用
 
-從 [Releases](https://github.com/alzpqm/FakeTraffic/releases) 下載套件並核對 SHA256SUMS。
-本版套件適用 OpenWrt 25.12／x86_64；安裝與回復見[說明](docs/migration.md)。
-需要統一設定與服務管理時，請使用較新的產品版本，勿混裝不同版本的介面。
+- `faketraffic`：核心服務與兩個引擎。
+- `luci-app-faketraffic`：共同設定頁及服務啟停。
+
+套件適用 OpenWrt 25.12／x86_64。先核對 SHA256SUMS，再依[安裝與回復說明](docs/migration.md)
+安裝相符版本。從 LuCI「服務 → FakeTraffic」選擇介面、啟用 TCP／UDP、設定偽裝內容並儲存套用。
+全新安裝不自動啟動服務；舊服務不可與新版並行注入。
+
+TTL／Hop Limit 應讓偽裝封包在抵達真實對端前耗盡；本工具不保證所有網路的分類效果或效能改善。
 
 ## 開發
 

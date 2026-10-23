@@ -1,6 +1,14 @@
 {
   "luci-app-faketraffic": {
-    "description": "Read FakeTraffic engine service state",
-    "read": { "ubus": { "service": [ "list" ] } }
+    "description": "Configure FakeTraffic TCP and UDP and control its single service",
+    "read": { "ubus": { "service": [ "list" ] }, "uci": [ "faketraffic" ] },
+    "write": {
+      "uci": [ "faketraffic" ],
+      "file": {
+        "/etc/init.d/faketraffic start": [ "exec" ],
+        "/etc/init.d/faketraffic restart": [ "exec" ],
+        "/etc/init.d/faketraffic stop": [ "exec" ]
+      }
+    }
   }
 }

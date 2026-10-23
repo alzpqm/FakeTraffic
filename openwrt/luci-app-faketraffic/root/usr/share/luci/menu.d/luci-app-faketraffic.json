@@ -2,7 +2,7 @@
   "admin/services/faketraffic": {
     "title": "FakeTraffic",
     "order": 59,
-    "action": { "type": "view", "path": "faketraffic" },
+    "action": { "type": "view", "path": "faketraffic/config" },
     "depends": { "acl": [ "luci-app-faketraffic" ] }
   }
 }
