@@ -11,7 +11,7 @@
 設定與啟用TCP/UDP；安裝不自動啟動，預設兩引擎停用。只需管理一個服務。
 
 ```sh
-apk add --simulate --allow-untrusted ./faketraffic-0.2.0-r1.apk ./luci-app-faketraffic-0.2.0-r1.apk
+apk add --simulate --allow-untrusted ./faketraffic-0.2.0-r2.apk ./luci-app-faketraffic-0.2.0-r2.apk
 # 確認交易後移除 --simulate 執行；不要使用 force-overwrite。
 ```
 

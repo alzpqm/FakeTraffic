@@ -54,21 +54,21 @@ chmod 0600 "$CORE/etc/config/faketraffic"
 # core must, however, stop and disable its own service before deleting files.
 cp "$ROOT/openwrt/faketraffic/pre-deinstall" "$WORK/pre-deinstall"
 chmod 0755 "$WORK/pre-deinstall"
-"$APK" mkpkg --info 'name:faketraffic' --info 'version:0.2.0-r1' \
+"$APK" mkpkg --info 'name:faketraffic' --info 'version:0.2.0-r2' \
   --info 'description:Integrated TCP and UDP camouflage service' --info "arch:$ARCH" \
   --info 'license:GPL-3.0-or-later' --info 'origin:faketraffic' \
   --info 'url:https://github.com/alzpqm/FakeTraffic' --info 'maintainer:Codex <codex@local.invalid>' \
   --info 'depends:libc libnetfilter-queue1 libnfnetlink0 libmnl0 kmod-nfnetlink-queue kmod-nft-queue nftables-json' \
   --script "pre-deinstall:$WORK/pre-deinstall" \
-  --files "$CORE" --output "$OUT/faketraffic-0.2.0-r1.apk"
-"$APK" mkpkg --info 'name:luci-app-faketraffic' --info 'version:0.2.0-r1' \
+  --files "$CORE" --output "$OUT/faketraffic-0.2.0-r2.apk"
+"$APK" mkpkg --info 'name:luci-app-faketraffic' --info 'version:0.2.0-r2' \
   --info 'description:Unified FakeTraffic TCP and UDP configuration' --info "arch:$ARCH" \
   --info 'license:GPL-3.0-or-later' --info 'origin:faketraffic' \
   --info 'url:https://github.com/alzpqm/FakeTraffic' --info 'maintainer:Codex <codex@local.invalid>' \
-  --info 'depends:luci-base rpcd-mod-file faketraffic=0.2.0-r1' \
-  --files "$LUCI" --output "$OUT/luci-app-faketraffic-0.2.0-r1.apk"
+  --info 'depends:luci-base rpcd-mod-file faketraffic=0.2.0-r2' \
+  --files "$LUCI" --output "$OUT/luci-app-faketraffic-0.2.0-r2.apk"
 for package in faketraffic luci-app-faketraffic; do
-    "$APK" adbdump "$OUT/$package-0.2.0-r1.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
+    "$APK" adbdump "$OUT/$package-0.2.0-r2.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
 done
-(cd "$OUT" && sha256sum faketraffic-0.2.0-r1.apk luci-app-faketraffic-0.2.0-r1.apk > SHA256SUMS)
+(cd "$OUT" && sha256sum faketraffic-0.2.0-r2.apk luci-app-faketraffic-0.2.0-r2.apk > SHA256SUMS)
 printf 'Private build work retained: %s\n' "$WORK"

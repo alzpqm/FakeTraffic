@@ -55,4 +55,28 @@ LEGACY=1 INSTANCES= PROGRAMS=
 start_service && fail 'Must refuse legacy ownership'
 [ -z "$INSTANCES" ] || fail 'Started beside legacy owner'
 service_triggers || fail 'Network/config triggers'
-echo 'Unified init: four enable combinations, queue collision, legacy refusal and triggers passed'
+ubus() { [ "$READY_MODE" != bus_error ] || return 1; printf '{}'; }
+jsonfilter() {
+    [ "$READY_MODE" != missing ] || return 0
+    case "$2" in *.udp.pid) return 0;; *) printf '411\n';; esac
+}
+readlink() {
+    if [ "$READY_MODE" = pre_exec ]; then printf '/sbin/procd\n'; else printf '/usr/libexec/faketraffic/fakehttp\n'; fi
+}
+awk() {
+    case "$1" in
+      *SigCgt*) if [ "$READY_MODE" = no_handler ]; then printf '0000000000000000\n'; else printf '0000000000004002\n'; fi;;
+      *SigBlk*) if [ "$READY_MODE" = blocked ]; then printf '0000000000004000\n'; else printf '0000000000000000\n'; fi;;
+    esac
+}
+sleep() { return 0; }
+for READY_MODE in pre_exec no_handler blocked bus_error; do
+    wait_instance_ready && fail "Readiness accepted $READY_MODE"
+done
+READY_MODE=ready
+wait_instance_ready || fail 'Stable engine rejected'
+READY_MODE=missing TCP_ENABLED=1 UDP_ENABLED=0
+wait_instance_ready faketraffic 1 && fail 'Missing enabled engine accepted'
+TCP_ENABLED=0 UDP_ENABLED=0
+wait_instance_ready faketraffic 1 || fail 'Disabled engines rejected'
+echo 'Unified init: enable combinations, queue collision, legacy refusal, triggers and seven readiness cases passed'

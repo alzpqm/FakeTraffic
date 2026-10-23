@@ -55,3 +55,40 @@
 - 補保留SIP原本Reset清除tooltip行為，來源漂移fixture也保留，現9項測試通。
   嘗試只重打LuCI以節省重編，但WSL先前/tmp stage已不存在，前置停止，沒有
   改APK或設備。改用持久/var/tmp工作根重建確切最新表單，禁止拿舊包冒稱新版。
+- 匿名來源提交 `60181b4b1311a63afbb5321701026095dd4a7088` 已推送，作者與提交者
+  Codex/local.invalid。22個新增/修改檔案匿名掃描0命中，136來源blob再次核對。
+  遠端CI成功：https://github.com/alzpqm/FakeTraffic/actions/runs/39948714381 。
+  本次只重打改動後的介面測試/打包；未重跑舊上游研究或模型投票。
+- 已準備唯讀新版觀察器（尚未啟動）；它另驗單一faketraffic服務下的tcp/udp
+  PID及舊兩服務每分鐘保持stopped/disabled，不能把舊雙服務窗口算作新版。
+- 舊版30分鐘實際完成，詳runtime30交接；高嚴重級與崩潰候選均0。
+  新版第一次遷移前置在不存在的faketraffic UCI執行changes時exit1，因此停止；
+  尚未安裝、停用、重啟或改正式設定。修正為存在的配置才查named changes，
+  不忽略實際existing config的錯誤或待套用變更，私人失敗回執保留。
+- 第二次切換實際安裝r1並開始引擎，過早的argv斷言失敗；同一段回復的argv
+  斷言又阻斷介面回復，曾標記rollback-incomplete。後續獨立read-only驗證
+  舊兩引擎已健康、argv相符、queue/drop0，再顯式恢復0.1.0介面成功及HTTPS200。
+  新核心r1仍安裝但disabled；沒有把r1標成正式release或假稱新版30分鐘通過。
+- 使用者允許對實質問題增加朋友研究、不限制朋友tokens。新一輪Gemini與
+  Claude各成功（10903/12113 reported tokens）；DeepSeek一次因max-tokens
+  2200中斷（2597tokens）為失敗，不冒稱完成。新增實測證據後另一聚焦問題
+  DeepSeek Flash/off成功1239tokens/guard2/tools0；不是原問題無變更重試。
+  費用未知。採納跨exec/argv/startticks/queue取樣與獨立UI回復；拒絕將尚無
+  原始快照的race直接稱已證、將loader改argv當定論、或新owner未退仍啟舊核心。
+- 專用未掛任何規則的queue65010/65011、skip-firewall測試共8案：6次立即
+  stop各2.054秒後procd SIGKILL；等待穩定後TCP0.081s/UDP0.041s正常退出。
+  已取得同PID/startticks從/sbin/procd argv過渡到真正engine的快照；正式
+  服務/設定及queue owners/drop保持，測試服務/queues清空。這次證實過早
+  gate與TERM時序風險，非先前猜測的封包引擎參數錯誤。
+- 開發r2就緒callback及7個stub案例。首個guard probe雖未SIGKILL，但其
+  start時間短於設計採樣窗，不能當guard生效證據；正在核實jsonfilter語法。
+- 裝置直接fixture證明兩種jsonfilter wildcard皆有效，拒絕先前語法猜測。
+  讀取probe實際stderr後定位BusyBox sleep不接受小數；原stub未測這個平台邊界。
+  改成可用時usleep、否則整數sleep1，兩條路徑均有約5秒上限且等待失敗不忽略。
+  實機probe新增stderr為空及實際採樣時間門檻，避免exit0就稱guard通過。
+- 第二個實機guard probe兩輪均實際等待約2秒，stop2.109/2.086秒（包含2秒
+  就緒確認），stderr空、無SIGKILL，正式服務/設定保持，測試queues/服務全退。
+  該裝置走整數sleep fallback；不得宣稱usleep分支已在此機驗證。
+- r2已建置並核對44個權限項目及兩binary SHA；既有argv等價要求沒有放寬。
+  遷移gate改為相同PID/startticks、精確exe/argv/TERM handler/queue連續取樣，
+  原始快照保存在私人位置。回復時新owner未清空不啟舊owner，但UI獨立嘗試。

@@ -25,3 +25,11 @@
    截圖CDP擷取逾時，沒有留下可聲稱的截圖檔；文字/DOM驗收結果分開記錄。
 5. fresh路由器preflight通過，兩核心仍為既有binary，PID/starttime與前輪相同、
    queue512/513 backlog及兩種drop均0。原始preflight僅私人保存。
+6. v0.1.0正式release公開，六個附件fresh下載SHA吻合；舊兩repo遷移README
+   推送並archive後才開始正式窗口，保留歷史。本版只有維護／入口整合，
+   使用者隨後糾正其不符合真正共同介面要求，另開unified-product交接。
+7. 舊版窗口實際19:21:07至19:51:08（Asia/Singapore），1800.91秒/31筆，
+   alert0，HTTPS/DNS各7/7成功。兩核心RSS/HWM904KiB、fd5、Threads1固定；
+   PID/starttime、52設定、binary/init/入口及boot保持，queue owner/drop保持。
+   新system86行/高嚴重級0，kernel新增0行，崩潰候選0，四份log均未截斷。
+   這不是新版共同服務/介面的驗收，不能沿用此時間冒稱新版通過。
