@@ -78,7 +78,9 @@ return view.extend({
 			}, this));
 			var buttons = [ [ 'start', _('Start') ], [ 'restart', _('Restart') ], [ 'stop', _('Stop') ] ].map(L.bind(function(item) {
 				var button = E('button', { 'type': 'button', 'class': 'cbi-button cbi-button-action',
-					'disabled': !!m.readonly, 'click': L.bind(function() { return this.command(item[0]); }, this) }, item[1]);
+					'click': L.bind(function() { return this.command(item[0]); }, this) }, item[1]);
+				// HTML boolean attributes remain true even when their string is "false".
+				button.disabled = !!m.readonly;
 				this.buttons.push(button);
 				return button;
 			}, this));
