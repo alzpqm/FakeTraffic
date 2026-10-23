@@ -15,7 +15,7 @@ TCP/UDP 統一管理方式，但保留目前已修復、驗證的封包處理行
 | --- | --- | --- |
 | TCP引擎 | FakeHTTP 99.3-r1 | 內部binary，procd instance `tcp`、queue 預設512 |
 | UDP引擎 | FakeSIP 0.9.1-r23 | 內部binary，procd instance `udp`、queue 預設513 |
-| FakeTraffic | 0.2.0-r2 開發版 | 單一服務／UCI／LuCI完整設定頁 |
+| FakeTraffic | 0.2.0（核心r2／LuCI r3）開發版 | 單一服務／UCI／LuCI完整設定頁 |
 
 精確來源、逐檔 SHA-256 與來源 commit 見 `sources.lock.json`；原作者版權與
 GPL-3.0-or-later 保留。原始歷史仍在原倉庫，來源導入不包含私人日誌或設備設定。
@@ -38,7 +38,7 @@ make test
 sudo make packages SDK=/absolute/path/to/openwrt-sdk
 ```
 
-只產生 `faketraffic-0.2.0-r2.apk` 與 `luci-app-faketraffic-0.2.0-r2.apk`。
+只產生 `faketraffic-0.2.0-r2.apk` 與 `luci-app-faketraffic-0.2.0-r3.apk`。
 全新設備一次安裝這兩包，不需要先手動安裝兩個舊服務或它們的LuCI。
 安裝及回復步驟見 [遷移說明](docs/migration.md)。
 

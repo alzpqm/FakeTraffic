@@ -56,6 +56,7 @@ test('one editable map includes complete TCP and UDP fields, with no legacy redi
   const fields = h.maps[0].sections.flatMap(s => s.fields.map(f => f.name));
   for (const name of ['enabled', 'payload', 'queue_number', 'queue_num', 'sip_profile', 'sip_uri', 'interface_mode', 'ttl']) assert.ok(fields.includes(name), name);
   assert.equal(h.view.handleSaveApply, undefined, 'Standard LuCI Save & Apply must remain enabled');
+  assert.ok(h.view.buttons.every(b => b.disabled === false && b.attrs.disabled === undefined));
 });
 test('equal effective queues reject the complete form before parsing either engine', async () => {
   const h = harness({ values: { 'globals.enabled': '1', 'main.enabled': '1', 'advanced.queue_number': '-1', 'main.queue_num': '512' } });
@@ -69,7 +70,7 @@ test('valid separate queues use the single normal parse cycle', async () => {
 });
 test('readonly sessions cannot run service actions', async () => {
   const h = harness({ readonly: true }); await h.view.render({}); await h.view.command('restart');
-  assert.equal(h.exec.length, 0); assert.ok(h.view.buttons.every(b => b.attrs.disabled));
+  assert.equal(h.exec.length, 0); assert.ok(h.view.buttons.every(b => b.disabled));
 });
 test('service actions only target the common init; failures restore controls', async () => {
   const h = harness({ result: { code: 1, stderr: 'blocked' } }); await h.view.render({}); await h.view.command('restart');

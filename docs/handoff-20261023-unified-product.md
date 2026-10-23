@@ -92,3 +92,19 @@
 - r2已建置並核對44個權限項目及兩binary SHA；既有argv等價要求沒有放寬。
   遷移gate改為相同PID/startticks、精確exe/argv/TERM handler/queue連續取樣，
   原始快照保存在私人位置。回復時新owner未清空不啟舊owner，但UI獨立嘗試。
+- r2實機切換成功，兩引擎argv完全相同（除exe路徑），原52配置SHA保持。
+  真正完成新→舊引擎fallback→新切換，HTTPS200；沒有宣稱整組核心APK解除
+  安裝/重裝回復測過。舊兩服務已stop/disable，舊四包暫保留作回復。
+- 瀏覽器載入實際共同頁面：TCP一般/多載荷/進階與UDP完整欄位同一Map。
+  找到E('button', disabled:false)被轉成HTML disabled="false"的實際bug，
+  DOM顯示三按鈕disabled:true，而其他欄位可編輯。已改設DOM boolean property，
+  regression明驗無false attribute；只升LuCI r3，核心r2/PID與全部配置保持。
+- r3真實DOM一個Map、三服務按鈕enabled、TCP/UDP Running。UDP queue暫填512，
+  按儲存出現本地「TCP與UDP必須不同NFQUEUE」錯誤，沒有套用；關閉並reload後
+  回到513。這個預期負測在console記一筆Error，不當作崩潰或聲稱console全空。
+  未對正式配置按有效的Save & Apply；原生共同保存流程另由單Map單元測試覆蓋。
+- 成功擷取只含服務狀態/說明/一般標題的匿名clip，不含位址/hostname/介面或
+  載荷設定；已在工具中呈現，未上傳GitHub或冒稱已存成公開附件。
+- 新版獨立1800秒觀察已啟動（核心r2／LuCI r3）。首次live回執index4/240秒、
+  alert0、legacyStoppedDisabled=true、queues積壓/drop0；RSS TCP932/UDP924KiB。
+  新窗口起點與舊窗口分開；後續仍待足1800秒、完整log/資源/探針核對。

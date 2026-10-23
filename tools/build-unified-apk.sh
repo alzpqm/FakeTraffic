@@ -61,14 +61,15 @@ chmod 0755 "$WORK/pre-deinstall"
   --info 'depends:libc libnetfilter-queue1 libnfnetlink0 libmnl0 kmod-nfnetlink-queue kmod-nft-queue nftables-json' \
   --script "pre-deinstall:$WORK/pre-deinstall" \
   --files "$CORE" --output "$OUT/faketraffic-0.2.0-r2.apk"
-"$APK" mkpkg --info 'name:luci-app-faketraffic' --info 'version:0.2.0-r2' \
+"$APK" mkpkg --info 'name:luci-app-faketraffic' --info 'version:0.2.0-r3' \
   --info 'description:Unified FakeTraffic TCP and UDP configuration' --info "arch:$ARCH" \
   --info 'license:GPL-3.0-or-later' --info 'origin:faketraffic' \
   --info 'url:https://github.com/alzpqm/FakeTraffic' --info 'maintainer:Codex <codex@local.invalid>' \
   --info 'depends:luci-base rpcd-mod-file faketraffic=0.2.0-r2' \
-  --files "$LUCI" --output "$OUT/luci-app-faketraffic-0.2.0-r2.apk"
+  --files "$LUCI" --output "$OUT/luci-app-faketraffic-0.2.0-r3.apk"
 for package in faketraffic luci-app-faketraffic; do
-    "$APK" adbdump "$OUT/$package-0.2.0-r2.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
+    case "$package" in faketraffic) release=2;; *) release=3;; esac
+    "$APK" adbdump "$OUT/$package-0.2.0-r$release.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
 done
-(cd "$OUT" && sha256sum faketraffic-0.2.0-r2.apk luci-app-faketraffic-0.2.0-r2.apk > SHA256SUMS)
+(cd "$OUT" && sha256sum faketraffic-0.2.0-r2.apk luci-app-faketraffic-0.2.0-r3.apk > SHA256SUMS)
 printf 'Private build work retained: %s\n' "$WORK"
