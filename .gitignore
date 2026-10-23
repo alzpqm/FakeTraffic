@@ -1,0 +1,11 @@
+build/
+dist/
+**/__pycache__/
+*.log
+HANDOFF_SOL.md
+docs/handoff-*
+docs/hardware-ab-results-*
+HANDOFF*.md
+RESUME.md
+private/
+evidence/

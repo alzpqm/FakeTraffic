@@ -1,0 +1,13 @@
+FakeTraffic integration: Copyright (C) 2026 Codex contributors.
+SPDX-License-Identifier: GPL-3.0-or-later
+
+Contains modified downstream distributions of:
+  FakeHTTP - https://github.com/MikeWang000000/FakeHTTP
+  FakeSIP  - https://github.com/MikeWang000000/FakeSIP
+Original copyright notices and licenses are preserved in components/.
+Exact downstream source references are recorded in sources.lock.json.
+
+The independently implemented lilu0826/fake-flow project was studied as an
+architectural comparison only. No GPL-2.0-only source or headers from that
+project are incorporated. FakeTraffic is not an endorsed or affiliated fork
+of that project.
