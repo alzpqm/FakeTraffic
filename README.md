@@ -1,7 +1,8 @@
 # FakeTraffic
 
 OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設定，由同一個服務管理。
-提供 NFQUEUE 與可選的 eBPF 後端。
+支援 NFQUEUE 與可選的 eBPF 後端，兩者擇一運行。
+不需另外安裝或啟動獨立的 FakeHTTP、FakeSIP、fake-flow 服務。
 
 ## 功能
 
@@ -11,10 +12,11 @@ OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設�
 - eBPF 支援每協定 1–16 份模板輪替。
 - LuCI 顯示運行狀態、實際後端、模板數與流量計數器，並提供 eBPF 相容性預檢。
 
-## 下載與安裝
+## 下載與需求
 
-從 [GitHub Releases](https://github.com/alzpqm/FakeTraffic/releases) 下載套件及 `SHA256SUMS`。
-目前預編譯套件適用於 **OpenWrt 25.12／x86_64**，版本為 **0.4.0-r3**。
+目前版本：[**0.4.0-r3**](https://github.com/alzpqm/FakeTraffic/releases/tag/v0.4.0-r3)。
+預編譯 APK 適用於 **OpenWrt 25.12／x86_64**；其他架構或韌體版本需先確認建置與相依相容性。
+請從同一個 Release 下載所需套件及 `SHA256SUMS`，不要混用不同版本。
 
 | 套件 | 用途 |
 | --- | --- |
@@ -22,32 +24,58 @@ OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設�
 | `luci-app-faketraffic` | LuCI 管理介面 |
 | `faketraffic-ebpf` | 可選的 eBPF 後端 |
 
-下載三個 APK 與校驗清單後，先核對檔案：
+套件數不等於服務數：NFQUEUE 使用核心與 LuCI 兩包；eBPF 使用三包，
+但都只管理一個 `faketraffic` 服務、一份設定及同一個 LuCI 頁面。
+
+若三個 APK 都已下載到同一目錄，可一次核對完整校驗清單：
 
 ```sh
 sha256sum -c SHA256SUMS
 ```
 
-安裝核心與 LuCI：
+若只下載部分套件，請核對該檔案的 SHA256 與清單對應列；缺少其他檔案不是下載檔案損壞的證據。
+eBPF 另需 Linux 6.6+、TCX 與匹配的系統相依套件，安裝後仍須執行相容性預檢。
+
+## 首次安裝
+
+以下兩種方式擇一。若已有 FakeTraffic，請先閱讀下方「升級現有安裝」；
+從獨立舊專案遷移則先看[遷移說明](docs/migration.md)，停用舊服務後才啟動新版。
+
+**使用 NFQUEUE**，安裝核心與 LuCI：
 
 ```sh
 apk add --allow-untrusted ./faketraffic-0.4.0-r3.apk ./luci-app-faketraffic-0.4.0-r3.apk
 ```
 
-需要 eBPF 時，再安裝相同版本的後端套件：
+**需要 eBPF**，三個套件在同一筆交易安裝：
 
 ```sh
-apk add --allow-untrusted ./faketraffic-ebpf-0.4.0-r3.apk
+apk add --allow-untrusted \
+  ./faketraffic-0.4.0-r3.apk \
+  ./luci-app-faketraffic-0.4.0-r3.apk \
+  ./faketraffic-ebpf-0.4.0-r3.apk
 ```
 
-eBPF 需要 Linux 6.6+、TCX 與匹配的系統相依套件。全新安裝時，服務及協定預設不啟用。
-從舊 FakeHTTP／FakeSIP／fake-flow 遷移時，請先依[升級與回復說明](docs/migration.md)處理舊服務。
+全新安裝不會自動啟用服務或協定，初始後端為 NFQUEUE；安裝 eBPF 套件本身不會自動切換後端。
+
+## 升級現有安裝
+
+先備份設定、原套件與服務啟用狀態，再依[升級與回復說明](docs/migration.md)乾淨停止服務。
+停止失敗或仍有未知程序／checkpoint 時，先查明原因，不要直接覆蓋或刪除保護檔案。
+
+核心、LuCI 及已安裝的 eBPF 套件必須在**同一筆 `apk add` 交易**更新為同版本。
+已安裝 `faketraffic-ebpf` 者，**即使目前選用 NFQUEUE，也要使用上方三包命令**；
+不可先升核心，再單獨補升後端，否則可能產生精確版本相依衝突。
+只有未安裝 eBPF 套件者才使用兩包命令。
+
+升級完成後啟動 `faketraffic`，核對運行狀態與原開機啟用狀態。升級沿用既有設定，
+不需重新選擇後端或重新建立模板；相依交易若涉及預期外套件變動，請停止處理，勿強制忽略相依。
 
 ## 開始使用
 
 1. 開啟 LuCI 的「服務 → FakeTraffic」。
 2. 選擇要使用的介面，啟用 TCP 或 UDP，填寫偽裝內容與參數。
-3. 選擇處理後端。預設為 NFQUEUE；使用 eBPF 前，請檢查相容性預檢與語義差異提示。
+3. 選擇處理後端。新安裝預設為 NFQUEUE；使用 eBPF 前，請檢查相容性預檢與語義差異提示。
 4. 儲存並套用，再確認頁面上的運行狀態；需要時使用「啟動」按鈕。
 
 若要開機自動啟動：
