@@ -35,8 +35,8 @@
     },
     "fakesip/src/rawsend.c": {
       "baseSHA256": "501e98dd3b4024d4dd40c175d50f53d82caa695aed2951bd52648de5e454e2e9",
-      "sha256": "b09258b636286c2356120eb5428e21ed179bad2fbffa8792853a79c4cd7da8ed",
-      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+      "sha256": "5abc65c0cd9fb76471b529fe585a62b8ec8ecd0c85e8cbac59776b6d5a86a3c6",
+      "reason": "GPL-3.0-or-later telemetry and conventional initial TTL32 hop estimation matching the TCP engine"
     },
     "fakesip/src/telemetry.c": {
       "baseSHA256": null,
@@ -70,7 +70,7 @@
     },
     "fakeflow/ebpf/user/lifecycle.c": {
       "baseSHA256": "78a8c507c747adbaf6638262df87ce0cd296b91db84748cf264d9563833d6de0",
-      "sha256": "0d5e94f4dd820f0d204009143f438ddb9403c855133aa1c4f37fb9a0cbc527a8",
+      "sha256": "6e33ce1e53e44699680a4caa607af08497d6188b247127221446adfb323be660",
       "reason": "Independent GPL-2.0-only backend: FD-owned TAP/TUN and TCX, bounded control I/O and uint64 metrics; persist newly attached WAN ownership before enabling lease, propagate checkpoint errors, and avoid quiet-refresh rewrites; GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
     },
     "fakeflow/Makefile": {
@@ -90,7 +90,7 @@
     },
     "fakeflow/ebpf/bpf/observer.bpf.c": {
       "baseSHA256": "460ebce39e8e7324d10ebe5e7db298d141a835af7b1bb176bc487d82edfcce96",
-      "sha256": "ccf6c9630a6596648c310763f62409a3bccdeceaa9d647b809eba4c674f1a100",
+      "sha256": "5979f9cc29f53c7926a0d3a8640547ab3f739b1adf67e4c3ebe2fbf4f537ce67",
       "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
     },
     "fakeflow/ebpf/bpf/builder.bpf.c": {

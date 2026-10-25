@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=faketraffic-ebpf
 PKG_VERSION:=0.4.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 PKG_LICENSE:=GPL-2.0-only
 PKG_BUILD_DEPENDS:=bpf-headers
 FAKETRAFFIC_SOURCE_DIR?=$(realpath $(CURDIR)/../..)
@@ -13,7 +13,7 @@ define Package/faketraffic-ebpf
   CATEGORY:=Network
   TITLE:=Experimental TCX backend for the single FakeTraffic service
   DEPENDS:=+faketraffic +libbpf +libelf +zlib +libgcc +ip-full +tc-full +kmod-sched-bpf +kmod-tun $(BPF_DEPENDS)
-  EXTRA_DEPENDS:=faketraffic (=0.4.0-r2)
+  EXTRA_DEPENDS:=faketraffic (=0.4.0-r3)
 endef
 
 define Build/Prepare

@@ -14,7 +14,7 @@ OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設�
 ## 下載與安裝
 
 從 [GitHub Releases](https://github.com/alzpqm/FakeTraffic/releases) 下載套件及 `SHA256SUMS`。
-目前預編譯套件適用於 **OpenWrt 25.12／x86_64**，版本為 **0.4.0-r2**。
+目前預編譯套件適用於 **OpenWrt 25.12／x86_64**，版本為 **0.4.0-r3**。
 
 | 套件 | 用途 |
 | --- | --- |
@@ -31,13 +31,13 @@ sha256sum -c SHA256SUMS
 安裝核心與 LuCI：
 
 ```sh
-apk add --allow-untrusted ./faketraffic-0.4.0-r2.apk ./luci-app-faketraffic-0.4.0-r2.apk
+apk add --allow-untrusted ./faketraffic-0.4.0-r3.apk ./luci-app-faketraffic-0.4.0-r3.apk
 ```
 
 需要 eBPF 時，再安裝相同版本的後端套件：
 
 ```sh
-apk add --allow-untrusted ./faketraffic-ebpf-0.4.0-r2.apk
+apk add --allow-untrusted ./faketraffic-ebpf-0.4.0-r3.apk
 ```
 
 eBPF 需要 Linux 6.6+、TCX 與匹配的系統相依套件。全新安裝時，服務及協定預設不啟用。

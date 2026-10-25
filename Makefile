@@ -4,6 +4,7 @@ all:
 	$(MAKE) -C components/fakesip VERSION=0.9.1-openwrt
 
 test: all test-telemetry test-ebpf-config
+	python3 tests/hop-estimate.py
 	node tools/verify-sources.mjs
 	$(MAKE) -C components/fakehttp test VERSION=99.3-r1
 	cd components/fakehttp && sh scripts/smoke-openwrt-package.sh
@@ -45,3 +46,5 @@ test-template-publication:
 	mkdir -p build
 	$(CC) -O2 -Wall -Wextra -Werror -ffunction-sections -fdata-sections $(if $(BPF_INCLUDE),-I$(BPF_INCLUDE)) tests/test-template-publication.c -Wl,--gc-sections -o build/test-template-publication
 	./build/test-template-publication
+	$(CC) -O2 -Wall -Wextra -Werror -ffunction-sections -fdata-sections $(if $(BPF_INCLUDE),-I$(BPF_INCLUDE)) tests/test-ebpf-stats.c -Wl,--gc-sections -o build/test-ebpf-stats
+	./build/test-ebpf-stats

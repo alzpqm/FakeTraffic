@@ -56,7 +56,11 @@ void fs_rawsend_cleanup(void);
 
 static int hop_estimate(uint8_t ttl)
 {
-    if (ttl <= 64) {
+    /* Match the TCP engine's conservative conventional initial-TTL buckets.
+       This remains a heuristic, not proof of the reverse path length. */
+    if (ttl <= 32) {
+        return 32 - ttl;
+    } else if (ttl <= 64) {
         return 64 - ttl;
     } else if (ttl <= 128) {
         return 128 - ttl;

@@ -71,7 +71,7 @@ legacy_active() {
 }
 
 start_service() {
-    local tcp_enabled udp_enabled tcp_queue udp_queue backend
+    local tcp_enabled udp_enabled backend
     legacy_active && return 1
     network_flush_cache
     config_load faketraffic
@@ -88,14 +88,7 @@ start_service() {
         nfqueue) ;;
         *) logger -t faketraffic "unsupported backend"; return 1;;
     esac
-    config_get tcp_queue advanced queue_number 512
-    config_get udp_queue main queue_num 513
-    [ "$tcp_queue" != -1 ] || tcp_queue=512
-    if [ "$tcp_enabled" = 1 ] && [ "$udp_enabled" = 1 ] &&
-       [ "$tcp_queue" -eq "$udp_queue" ] 2>/dev/null; then
-        logger -t faketraffic "TCP and UDP cannot share one NFQUEUE"
-        return 1
-    fi
+    validate_nfqueue || return 1
     start_tcp
     start_udp main
     return 0

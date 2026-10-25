@@ -18,8 +18,8 @@ deletion. Control I/O uses absolute deadlines, independent of external timeout.
 These changes do not inherit upstream or previous stock-binary test results.
 The original `stats` protocol remains available; the manager uses `metrics`.
 There is one service and one LuCI page, not a second fake-flow init service.
-Backend package 0.3.0-r3 records newly attached WAN TCX ownership before enabling
-the startup lease and propagates checkpoint update errors to controlled cleanup.
-Unchanged periodic refreshes do not rewrite the checkpoint. Packet algorithms
-and the BPF object are unchanged from r2; these are our lifecycle corrections,
-not a claim of an upstream kernel defect.
+New WAN TCX ownership is recorded before enabling the startup lease; checkpoint
+errors propagate to controlled cleanup and unchanged refreshes do not rewrite it.
+The backend includes downstream multi-template rotation, conventional initial-TTL32
+estimation and explicit diagnostic read/overflow errors. These are downstream
+changes, not a claim of an upstream kernel defect.

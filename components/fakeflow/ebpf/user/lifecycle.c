@@ -212,12 +212,22 @@ static int reload(struct runtime *r,const char *path,char *result,size_t size) {
 static void stats_json(struct runtime *r,FILE *out) {
     int n=libbpf_num_possible_cpus();if(n<=0){fputs("{\"error\":\"CPU query failed\"}\n",out);return;}
     __u64 *values=calloc(n,sizeof(*values));if(!values){fputs("{\"error\":\"allocation failed\"}\n",out);return;}
-    fputc('{',out);
+    unsigned long long totals[FF_STATS_MAX]={};
     for(unsigned k=0;k<FF_STATS_MAX;k++) {
-        unsigned long long total=0;
-        if(!bpf_map_lookup_elem(map(r,"stats"),&k,values)) for(int i=0;i<n;i++)total+=values[i];
-        fprintf(out,"%s\"%s\":%llu",k?",":"",ff_stat_names[k],total);
+        if(bpf_map_lookup_elem(map(r,"stats"),&k,values)) {
+            free(values);fputs("{\"error\":\"MAP_READ_FAILED\"}\n",out);return;
+        }
+        for(int i=0;i<n;i++) {
+            if(ULLONG_MAX-totals[k]<values[i]) {
+                free(values);fputs("{\"error\":\"COUNTER_OVERFLOW\"}\n",out);return;
+            }
+            totals[k]+=values[i];
+        }
     }
+    /* Preserve the successful numeric ABI; never publish partial or false zeros. */
+    fputc('{',out);
+    for(unsigned k=0;k<FF_STATS_MAX;k++)
+        fprintf(out,"%s\"%s\":%llu",k?",":"",ff_stat_names[k],totals[k]);
     fputs("}\n",out);free(values);
 }
 /* Separate from upstream numeric stats ABI: uint64 strings, never read-error=0. */
@@ -431,7 +441,7 @@ int ff_client(const char *runtime,const char *command) {
         if(getsockopt(fd,SOL_SOCKET,SO_ERROR,&error,&size) || error)goto done;
     }
     size_t sent=0,length=strlen(command),received=0,prefix_len=0;
-    char buffer[8192],prefix[5];ssize_t n;
+    char buffer[8192],prefix[9];ssize_t n;
     while(sent<length) {
         if(wait_socket(fd,POLLOUT,deadline))goto done;
         n=send(fd,command+sent,length-sent,MSG_NOSIGNAL);
@@ -449,7 +459,8 @@ int ff_client(const char *runtime,const char *command) {
         if(n<0 || received+(size_t)n>16384) {rc=1;break;}
         received+=(size_t)n;
         for(ssize_t i=0;i<n && prefix_len<sizeof(prefix);i++)prefix[prefix_len++]=buffer[i];
-        if(prefix_len==sizeof(prefix) && !memcmp(prefix,"ERROR",5))rc=1;
+        if((prefix_len>=5 && !memcmp(prefix,"ERROR",5)) ||
+           (prefix_len>=9 && !memcmp(prefix,"{\"error\":",9)))rc=1;
         if(fwrite(buffer,1,(size_t)n,stdout)!=(size_t)n) {rc=1;break;}
     }
 done:

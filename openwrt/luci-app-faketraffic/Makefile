@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=luci-app-faketraffic
 PKG_VERSION:=0.4.0
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 PKG_LICENSE:=GPL-3.0-or-later
 PKGARCH:=all
 PKG_BUILD_DEPENDS:=luci-base/host gettext-full/host
@@ -14,7 +14,7 @@ define Package/luci-app-faketraffic
   SUBMENU:=3. Applications
   TITLE:=FakeTraffic unified TCP and UDP configuration
   DEPENDS:=+luci-base +rpcd-mod-file +faketraffic
-  EXTRA_DEPENDS:=faketraffic (=0.4.0-r2)
+  EXTRA_DEPENDS:=faketraffic (=0.4.0-r3)
   PKGARCH:=all
 endef
 

@@ -36,6 +36,32 @@ wait_own_stopped() {
     logger -t faketraffic 'Existing backend has not stopped; no replacement started'
     return 1
 }
+nfqueue_number_valid() {
+    case "$1" in ''|*[!0-9]*) return 1;; esac
+    [ "$1" -ge 0 ] 2>/dev/null && [ "$1" -le 65535 ] 2>/dev/null
+}
+# Pure candidate validation, shared by start and reload. Disabled protocols do
+# not reserve queues. Keep this before stop so invalid UCI imports cannot evict
+# a working owner; the LuCI form is not the only configuration writer.
+validate_nfqueue() {
+    local tcp_enabled udp_enabled tcp_queue udp_queue
+    config_get_bool tcp_enabled globals enabled 0
+    config_get_bool udp_enabled main enabled 0
+    config_get tcp_queue advanced queue_number 512
+    config_get udp_queue main queue_num 513
+    [ "$tcp_queue" != -1 ] || tcp_queue=512
+    if { [ "$tcp_enabled" = 1 ] && ! nfqueue_number_valid "$tcp_queue"; } ||
+       { [ "$udp_enabled" = 1 ] && ! nfqueue_number_valid "$udp_queue"; }; then
+        logger -t faketraffic 'Invalid NFQUEUE number; active service preserved'
+        return 1
+    fi
+    if [ "$tcp_enabled" = 1 ] && [ "$udp_enabled" = 1 ] &&
+       [ "$tcp_queue" -eq "$udp_queue" ] 2>/dev/null; then
+        logger -t faketraffic 'TCP and UDP cannot share one NFQUEUE'
+        return 1
+    fi
+    return 0
+}
 reload_backend() {
     local backend tcp_enabled udp_enabled
     config_load faketraffic
@@ -46,7 +72,7 @@ reload_backend() {
         ebpf)
             if [ "$tcp_enabled" = 1 ] || [ "$udp_enabled" = 1 ]; then /usr/libexec/faketraffic/preflight check || return 1; fi
             ;;
-        nfqueue) ;;
+        nfqueue) validate_nfqueue || return 1;;
         *) return 1;;
     esac
     # Validate first. Do not stop a working backend for an invalid candidate.

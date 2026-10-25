@@ -24,7 +24,7 @@ static __noinline int emit(struct __sk_buff *skb,struct ff_interface *iface,stru
     __u32 protocol=ttl_protocol&255,remote_ttl=ttl_protocol>>8;
     __u64 now=bpf_ktime_get_ns();__u32 ttl=c->ttl,z=0;
     if(c->estimate_hops && remote_ttl) {
-        __u32 initial=remote_ttl<=64?64:remote_ttl<=128?128:255;
+        __u32 initial=remote_ttl<=32?32:remote_ttl<=64?64:remote_ttl<=128?128:255;
         __u32 hops=initial-remote_ttl;
         __u32 dynamic=hops*c->percent/100;
         if(dynamic>ttl) ttl=dynamic;

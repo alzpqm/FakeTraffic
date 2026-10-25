@@ -17,6 +17,8 @@ def run_case(mode):
                     if mode == 'normal': connection.sendall(b'{"running":true}\n')
                     elif mode == 'error':
                         connection.sendall(b'ER'); time.sleep(.05); connection.sendall(b'ROR failed\n')
+                    elif mode == 'json-error':
+                        connection.sendall(b'{"err'); time.sleep(.05); connection.sendall(b'or":"MAP_READ_FAILED"}\n')
                     elif mode == 'large': connection.sendall(b'x' * 20000)
                     elif mode == 'empty': pass
                     elif mode == 'stall': finished.wait(5)
@@ -36,4 +38,4 @@ def run_case(mode):
         finally:
             finished.set(); listener.close(); thread.join(timeout=1)
         return {'case': mode, 'elapsed_seconds': round(elapsed, 3), 'rc': result.returncode}
-print(json.dumps([run_case(mode) for mode in ['normal', 'error', 'large', 'empty', 'stall', 'trickle']]))
+print(json.dumps([run_case(mode) for mode in ['normal', 'error', 'json-error', 'large', 'empty', 'stall', 'trickle']]))
