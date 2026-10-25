@@ -8,6 +8,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install build and test dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential libnetfilter-queue-dev libnfnetlink-dev libmnl-dev nodejs gettext libjson-pp-perl
+        run: sudo apt-get update && sudo apt-get install -y build-essential libnetfilter-queue-dev libnfnetlink-dev libmnl-dev libbpf-dev libelf-dev zlib1g-dev clang llvm pkg-config nodejs gettext libjson-pp-perl python3
       - name: Verify sources and integrated product
         run: make test
+      - name: Compile the native eBPF daemon and kernel object
+        run: make -C components/fakeflow all
+      - name: Exercise bounded template publication and rollback
+        run: make test-template-publication

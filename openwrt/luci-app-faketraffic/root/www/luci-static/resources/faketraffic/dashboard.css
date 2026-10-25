@@ -1,0 +1,72 @@
+/* Scoped to this view; no framework, external fonts or theme mutations. */
+.ft-app {
+	--ft-border: #d5dce2;
+	--ft-soft: #f6f8fa;
+	--ft-accent: #116b72;
+	--ft-warning: #844900;
+	--ft-warning-bg: #fff5df;
+	--ft-surface: #fff;
+	--ft-text: #26313a;
+	color: inherit;
+}
+.ft-app .ft-overview, .ft-app .ft-preflight {
+	border: 1px solid var(--ft-border);
+	border-radius: 12px;
+	padding: 24px;
+	margin: 0 0 20px;
+	background: var(--ft-surface);
+	color: var(--ft-text);
+}
+.ft-app .ft-overview { border-top: 4px solid var(--ft-accent); }
+.ft-app .ft-toolbar, .ft-app .ft-actions, .ft-app .ft-protocols {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+.ft-app .ft-eyebrow { color: var(--ft-accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; margin: 0 0 6px; }
+.ft-app .ft-title { font-size: 28px; line-height: 1.2; margin: 0; border: 0; }
+.ft-app .ft-subtitle { font-size: 14px; margin: 8px 0 0; }
+.ft-app .ft-actions { justify-content: flex-start; gap: 8px; }
+.ft-app .ft-action { min-height: 36px; padding: 6px 16px; border-radius: 6px; }
+.ft-app .ft-action-start { background: var(--ft-accent); border-color: var(--ft-accent); color: #fff; }
+.ft-app .ft-action-stop { border-color: #aa4141; color: #962c2c; background: transparent; }
+.ft-app .ft-action:disabled { opacity: .55; cursor: not-allowed; }
+.ft-app .ft-protocols { justify-content: flex-start; margin-top: 18px; gap: 8px 20px; font-size: 12px; font-weight: 600; }
+.ft-app .ft-sampling { margin: 4px 0 14px; font-size: 12px; }
+.ft-app .ft-notice { padding: 10px 12px; border-left: 3px solid var(--ft-border); margin: 12px 0; font-size: 12px; overflow-wrap: anywhere; }
+.ft-app .ft-notice-warning { color: var(--ft-warning); background: var(--ft-warning-bg); border-left-color: var(--ft-warning); font-weight: 600; }
+.ft-app .ft-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 18px 0 12px; }
+.ft-app .ft-card { min-width: 0; padding: 18px; border: 1px solid var(--ft-border); border-radius: 9px; }
+.ft-app .ft-card-top { min-height: 54px; }
+.ft-app .ft-card h3 { font-size: 15px; margin: 0 0 6px; line-height: 1.4; }
+.ft-app .ft-status { display: inline-block; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.ft-app .ft-status-running { color: var(--ft-accent); font-weight: 600; }
+.ft-app .ft-status-running::before { content: '● '; }
+.ft-app .ft-status-disabled::before { content: '○ '; }
+.ft-app .ft-status-unknown::before { content: '— '; }
+.ft-app .ft-metric { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: clamp(20px, 2.4vw, 30px); font-weight: 600; line-height: 1.5; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; margin-top: 14px; }
+.ft-app .ft-metric-label { font-size: 12px; min-height: 32px; margin-bottom: 10px; }
+.ft-app .ft-details { border-top: 1px solid var(--ft-border); padding-top: 10px; }
+.ft-app .ft-details summary { cursor: pointer; font-size: 12px; font-weight: 600; padding: 3px 0; }
+.ft-app .ft-details pre { white-space: pre-wrap; overflow-wrap: anywhere; word-break: normal; font-size: 12px; line-height: 1.7; border: 0; border-radius: 5px; background: var(--ft-soft); color: inherit; padding: 12px; margin: 10px 0 0; }
+.ft-app .ft-footnote { font-size: 12px; line-height: 1.7; margin: 6px 0; }
+.ft-app .ft-preflight h3 { margin: 0; font-size: 16px; }
+.ft-app :is(button, summary):focus-visible { outline: 2px solid var(--ft-accent); outline-offset: 3px; }
+@media (max-width: 800px) {
+	.ft-app .ft-grid { grid-template-columns: minmax(0, 1fr); }
+	.ft-app .ft-overview, .ft-app .ft-preflight { padding: 16px; border-radius: 8px; }
+	.ft-app .ft-card-top { min-height: 0; }
+	.ft-app .ft-card { padding: 16px; }
+	.ft-app .ft-title { font-size: 24px; }
+}
+@media (prefers-color-scheme: dark) {
+	.ft-app {
+		--ft-border: #687987; --ft-soft: #182128; --ft-surface: #202930;
+		--ft-text: #e7edf2; --ft-accent: #8ddbe0;
+		--ft-warning: #ffdda3; --ft-warning-bg: #3b2c16;
+	}
+	.ft-app .ft-action-start { color: #172128; }
+	.ft-app .ft-action-stop { color: #ffbcbc; border-color: #cf8585; }
+}

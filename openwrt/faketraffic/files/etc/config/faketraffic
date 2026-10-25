@@ -1,5 +1,9 @@
 # One faketraffic service manages TCP and UDP.
 config globals 'globals'
+	option backend 'nfqueue'
+	option accept_ebpf_semantics '0'
+	option udp_trigger 'egress'
+	option ebpf_interface_mode 'l3'
 	option enabled '0'
 	option silent '1'
 	list interface 'wan'

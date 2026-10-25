@@ -5,8 +5,10 @@ set -u
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 WORK=$(mktemp -d /tmp/faketraffic-init-test.XXXXXX)
 trap 'rm -f "$WORK/init"; rmdir "$WORK"' EXIT HUP INT TERM
-sed '/^\. \/lib\//d' "$ROOT/openwrt/faketraffic/files/etc/init.d/faketraffic" > "$WORK/init"
+sed '/^\. \/lib\//d; /^\. \/usr\/libexec\/faketraffic\//d' "$ROOT/openwrt/faketraffic/files/etc/init.d/faketraffic" > "$WORK/init"
 . "$WORK/init"
+. "$ROOT/openwrt/faketraffic/files/usr/libexec/faketraffic/runtime-manager.sh"
+prepare_runtime() { return 0; }
 fail() { echo "FAIL: $*" >&2; exit 1; }
 config_get() {
     _target=$1 _section=$2 _option=$3 _fallback=${4:-}

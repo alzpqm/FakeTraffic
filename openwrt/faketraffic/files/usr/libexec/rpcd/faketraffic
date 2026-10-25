@@ -1,0 +1,13 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+case "$1" in
+    list) printf '%s\n' '{"status":{},"preflight":{}}';;
+    call)
+        case "$2" in
+            status) exec /usr/libexec/faketraffic/status;;
+            preflight) exec /usr/libexec/faketraffic/preflight json;;
+            *) exit 2;;
+        esac
+        ;;
+    *) exit 2;;
+esac

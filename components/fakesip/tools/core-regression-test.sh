@@ -18,6 +18,7 @@ build_test() {
     name=$1
     shift
     "$CC" $CFLAGS -I"$ROOT_DIR/include" "$ROOT_DIR/tests/$name.c" "$@" \
+        "$ROOT_DIR/src/telemetry.c" \
         -o "$WORK_DIR/$name"
     "$WORK_DIR/$name"
 }
@@ -49,6 +50,7 @@ if [ "$(uname -s)" = Linux ]; then
 
     "$CC" $CFLAGS -ffunction-sections -fdata-sections \
         -I"$ROOT_DIR/include" "$ROOT_DIR/tests/test_rawsend.c" \
+        "$ROOT_DIR/src/telemetry.c" \
         "$ROOT_DIR/src/globvar.c" "$ROOT_DIR/src/logging.c" \
         -Wl,--gc-sections -lnetfilter_queue -lnfnetlink -lmnl \
         -o "$WORK_DIR/test_rawsend"
@@ -56,6 +58,7 @@ if [ "$(uname -s)" = Linux ]; then
 
     "$CC" $CFLAGS -ffunction-sections -fdata-sections \
         -I"$ROOT_DIR/include" "$ROOT_DIR/tests/test_nfqueue.c" \
+        "$ROOT_DIR/src/telemetry.c" \
         "$ROOT_DIR/src/globvar.c" "$ROOT_DIR/src/logging.c" \
         -Wl,--gc-sections -lnetfilter_queue -lnfnetlink -lmnl \
         -o "$WORK_DIR/test_nfqueue"

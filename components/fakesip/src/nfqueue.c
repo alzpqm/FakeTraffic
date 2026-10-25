@@ -41,10 +41,20 @@
 #include "logging.h"
 #include "rawsend.h"
 #include "signals.h"
+#include "telemetry.h"
 
 static int fd = -1;
 static struct nfq_handle *h = NULL;
 static struct nfq_q_handle *qh = NULL;
+
+static int set_verdict(struct nfq_q_handle *queue, uint32_t id,
+                       uint32_t verdict, uint32_t length,
+                       const unsigned char *packet)
+{
+    int result = nfq_set_verdict(queue, id, verdict, length, packet);
+    if (result < 0) FT_COUNT(FT_VERDICT_ERRORS);
+    return result;
+}
 
 #define NFQ_MAX_PACKET_ERRORS 20U
 #define NFQ_BACKOFF_MAX_MS    1000U
@@ -128,8 +138,11 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
     (void) nfmsg;
     (void) data;
 
+    FT_COUNT(FT_QUEUED);
+
     ph = nfq_get_msg_packet_hdr(nfa);
     if (!ph) {
+        FT_COUNT(FT_METADATA_ERRORS);
         EE("ERROR: nfq_get_msg_packet_hdr(): %s", "failure");
         return -1;
     }
@@ -142,6 +155,7 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
     pkt_data = NULL;
     pkt_len = nfq_get_payload(nfa, &pkt_data);
     if (pkt_len < 0 || !pkt_data) {
+        FT_COUNT(FT_METADATA_ERRORS);
         EE("ERROR: nfq_get_payload(): %s", "failure");
         goto ret_accept;
     }
@@ -168,18 +182,19 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
 
     verdict = fs_rawsend_handle(&sll, pkt_data, pkt_len, &modified);
     if (verdict < 0) {
+        FT_COUNT(FT_ENGINE_ERRORS);
         EE(T(fs_rawsend_handle));
         goto ret_accept;
     }
 
     if (modified && verdict != NF_DROP) {
-        return nfq_set_verdict(qh, pkt_id, verdict, pkt_len, pkt_data);
+        return set_verdict(qh, pkt_id, verdict, pkt_len, pkt_data);
     }
 
-    return nfq_set_verdict(qh, pkt_id, verdict, 0, NULL);
+    return set_verdict(qh, pkt_id, verdict, 0, NULL);
 
 ret_accept:
-    return nfq_set_verdict(qh, pkt_id, NF_ACCEPT, 0, NULL);
+    return set_verdict(qh, pkt_id, NF_ACCEPT, 0, NULL);
 }
 
 
@@ -317,12 +332,14 @@ int fs_nfq_loop(void)
         return -1;
     }
 
+    ft_stats_queue(g_ctx.nfqnum);
     packet_err_cnt = transient_err_cnt = 0;
     poll_fd.fd = fd;
     poll_fd.events = POLLIN;
     poll_fd.revents = 0;
 
     while (!g_ctx.exit) {
+        ft_stats_tick("udp", 0);
         poll_fd.revents = 0;
         res = poll(&poll_fd, 1, NFQ_POLL_TIMEOUT_MS);
         if (res < 0) {
@@ -355,16 +372,19 @@ int fs_nfq_loop(void)
                 case EWOULDBLOCK:
 #endif
                 case ETIMEDOUT:
+                    FT_COUNT(FT_RECEIVE_ERRORS);
                     transient_err_cnt++;
                     error_backoff(transient_err_cnt);
                     continue;
                 case ENOBUFS:
+                    FT_COUNT(FT_RECEIVE_ERRORS);
                     transient_err_cnt++;
                     E("WARNING: recv(): %s; NFQUEUE remains active",
                       strerror(errno));
                     error_backoff(transient_err_cnt);
                     continue;
                 default:
+                    FT_COUNT(FT_RECEIVE_ERRORS);
                     E("ERROR: recv(): %s", strerror(errno));
                     ret = -1;
                     goto free_buff;
@@ -372,6 +392,7 @@ int fs_nfq_loop(void)
         }
 
         if (recv_len == 0) {
+            FT_COUNT(FT_RECEIVE_ERRORS);
             E("ERROR: recv(): %s", "NFQUEUE socket closed");
             ret = -1;
             goto free_buff;
@@ -381,6 +402,7 @@ int fs_nfq_loop(void)
         res = nfq_handle_packet(h, buff, recv_len);
         if (res < 0) {
             packet_err_cnt++;
+            FT_COUNT(FT_HANDLE_ERRORS);
             E("ERROR: nfq_handle_packet(): failure (%u/%u)", packet_err_cnt,
               NFQ_MAX_PACKET_ERRORS);
             if (packet_err_cnt >= NFQ_MAX_PACKET_ERRORS) {
@@ -398,6 +420,7 @@ int fs_nfq_loop(void)
     ret = 0;
 
 free_buff:
+    ft_stats_tick("udp", 1);
     free(buff);
 
     return ret;

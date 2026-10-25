@@ -34,6 +34,7 @@
 #include <libnetfilter_queue/libnetfilter_queue_tcp.h>
 
 #include "globvar.h"
+#include "telemetry.h"
 #include "ipv4pkt.h"
 #include "ipv6pkt.h"
 #include "logging.h"
@@ -164,7 +165,7 @@ static int remove_tfo_cookie(uint16_t ethertype, uint8_t *pkt, int pkt_len,
     AF_INET6 raw socket, so that the packet gets SNATed correctly.
 */
 static int sendto_snat(struct sockaddr_ll *sll, struct sockaddr *daddr,
-                       uint8_t *pkt_buff, int pkt_len)
+                       uint8_t *pkt_buff, int pkt_len, int original)
 {
     int res, ret, sock_fd;
     ssize_t nbytes;
@@ -201,6 +202,7 @@ static int sendto_snat(struct sockaddr_ll *sll, struct sockaddr *daddr,
     nbytes = sendto(sock_fd, pkt_buff, pkt_len, 0, daddr,
                     daddr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6)
                                                  : sizeof(struct sockaddr_in));
+    ft_stats_send(original, nbytes, (size_t) pkt_len);
     if (nbytes < 0) {
         E("ERROR: sendto(): %s", strerror(errno));
         goto close_socket;
@@ -229,6 +231,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
                                sport_be, dport_be, seq_be, ackseq_be, 1,
                                payload, payload_len);
         if (pkt_len < 0) {
+            FT_COUNT(FT_FAKE_BUILD_ERRORS);
             E(T(fh_pkt4_make));
             return -1;
         }
@@ -237,6 +240,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
                                sport_be, dport_be, seq_be, ackseq_be, 1,
                                payload, payload_len);
         if (pkt_len < 0) {
+            FT_COUNT(FT_FAKE_BUILD_ERRORS);
             E(T(fh_pkt6_make));
             return -1;
         }
@@ -246,7 +250,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
     }
 
     if (need_snat) {
-        nbytes = sendto_snat(sll, daddr, pkt_buff, pkt_len);
+        nbytes = sendto_snat(sll, daddr, pkt_buff, pkt_len, 0);
         if (nbytes < 0) {
             E(T(sendto_snat));
             return -1;
@@ -254,6 +258,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
     } else {
         nbytes = sendto(sockfd, pkt_buff, pkt_len, 0, (struct sockaddr *) sll,
                         sizeof(*sll));
+        ft_stats_send(0, nbytes, (size_t) pkt_len);
         if (nbytes < 0) {
             E("ERROR: sendto(): %s", strerror(errno));
             return -1;
@@ -375,6 +380,7 @@ int fh_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         sll->sll_pkttype = 0;
 
         if (!g_ctx.outbound) {
+            FT_COUNT(FT_SKIP_DIRECTION);
             E_INFO("%s:%u ===SYN-ACK(~)===> %s:%u", src_ip_str,
                    ntohs(tcph->source), dst_ip_str, ntohs(tcph->dest));
             return NF_ACCEPT;
@@ -392,6 +398,7 @@ int fh_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         if (!g_ctx.nohopest) {
             hop = hop_estimate(src_ttl);
             if (hop <= g_ctx.ttl) {
+                FT_COUNT(FT_SKIP_HOP);
                 E_INFO("%s:%u ===LOCAL(~)===> %s:%u", src_ip_str,
                        ntohs(tcph->source), dst_ip_str, ntohs(tcph->dest));
                 return NF_ACCEPT;
@@ -423,6 +430,7 @@ int fh_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
                                          sll->sll_addr, &sll->sll_halen);
 
         if (!g_ctx.inbound || srcinfo_unavail) {
+            FT_COUNT(srcinfo_unavail ? FT_SKIP_SOURCE : FT_SKIP_DIRECTION);
             E_INFO("%s:%u <===SYN-ACK(~)=== %s:%u", dst_ip_str,
                    ntohs(tcph->dest), src_ip_str, ntohs(tcph->source));
             return NF_ACCEPT;
@@ -437,6 +445,7 @@ int fh_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         if (!g_ctx.nohopest) {
             hop = hop_estimate(src_ttl);
             if (hop <= g_ctx.ttl) {
+                FT_COUNT(FT_SKIP_HOP);
                 E_INFO("%s:%u <===LOCAL(~)=== %s:%u", src_ip_str,
                        ntohs(tcph->source), dst_ip_str, ntohs(tcph->dest));
                 return NF_ACCEPT;
@@ -467,7 +476,7 @@ int fh_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
             packet.
         */
         if (g_ctx.use_iptables) {
-            nbytes = sendto_snat(sll, daddr, pkt_data, pkt_len);
+            nbytes = sendto_snat(sll, daddr, pkt_data, pkt_len, 1);
             if (nbytes < 0) {
                 E(T(sendto_snat));
                 return -1;
@@ -475,6 +484,7 @@ int fh_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         } else {
             nbytes = sendto(sockfd, pkt_data, pkt_len, 0,
                             (struct sockaddr *) sll, sizeof(*sll));
+            ft_stats_send(1, nbytes, (size_t) pkt_len);
             if (nbytes < 0) {
                 E("ERROR: sendto(): %s", strerror(errno));
                 return -1;

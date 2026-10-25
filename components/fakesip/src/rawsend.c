@@ -34,6 +34,7 @@
 #include <libnetfilter_queue/libnetfilter_queue_udp.h>
 
 #include "globvar.h"
+#include "telemetry.h"
 #include "ipv4pkt.h"
 #include "ipv6pkt.h"
 #include "logging.h"
@@ -183,6 +184,7 @@ static int sendto_snat(struct sockaddr_ll *sll, struct sockaddr *daddr,
     }
 
     nbytes = sendto(fd, pkt_buff, pkt_len, 0, daddr, daddrlen);
+    ft_stats_send(0, nbytes, (size_t) pkt_len);
     if (nbytes < 0) {
         E("ERROR: sendto(): %s", strerror(errno));
         return -1;
@@ -204,6 +206,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
         pkt_len = fs_pkt4_make(pkt_buff, sizeof(pkt_buff), saddr, daddr, ttl,
                                sport_be, dport_be, payload, payload_len);
         if (pkt_len < 0) {
+            FT_COUNT(FT_FAKE_BUILD_ERRORS);
             E(T(fs_pkt4_make));
             return -1;
         }
@@ -211,6 +214,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
         pkt_len = fs_pkt6_make(pkt_buff, sizeof(pkt_buff), saddr, daddr, ttl,
                                sport_be, dport_be, payload, payload_len);
         if (pkt_len < 0) {
+            FT_COUNT(FT_FAKE_BUILD_ERRORS);
             E(T(fs_pkt6_make));
             return -1;
         }
@@ -228,6 +232,7 @@ static int send_payload(struct sockaddr_ll *sll, struct sockaddr *saddr,
     } else {
         nbytes = sendto(sockfd, pkt_buff, pkt_len, 0, (struct sockaddr *) sll,
                         sizeof(*sll));
+        ft_stats_send(0, nbytes, (size_t) pkt_len);
         if (nbytes < 0) {
             E("ERROR: sendto(): %s", strerror(errno));
             return -1;
@@ -395,6 +400,7 @@ int fs_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         }
 
         if (!g_ctx.outbound) {
+            FT_COUNT(FT_SKIP_DIRECTION);
             E_INFO("%s:%u ===UDP(~)===> %s:%u", src_ip_str,
                    ntohs(udph->source), dst_ip_str, ntohs(udph->dest));
             return NF_ACCEPT;
@@ -408,6 +414,7 @@ int fs_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         if (!g_ctx.nohopest) {
             hop = hop_estimate(src_ttl);
             if (hop <= g_ctx.ttl) {
+                FT_COUNT(FT_SKIP_HOP);
                 E_INFO("%s:%u ===LOCAL(~)===> %s:%u", src_ip_str,
                        ntohs(udph->source), dst_ip_str, ntohs(udph->dest));
                 return NF_ACCEPT;
@@ -447,6 +454,7 @@ int fs_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         }
 
         if (!g_ctx.inbound) {
+            FT_COUNT(FT_SKIP_DIRECTION);
             E_INFO("%s:%u <===UDP(~)=== %s:%u", dst_ip_str, ntohs(udph->dest),
                    src_ip_str, ntohs(udph->source));
             return NF_ACCEPT;
@@ -457,6 +465,7 @@ int fs_rawsend_handle(struct sockaddr_ll *sll, uint8_t *pkt_data, int pkt_len,
         if (!g_ctx.nohopest) {
             hop = hop_estimate(src_ttl);
             if (hop <= g_ctx.ttl) {
+                FT_COUNT(FT_SKIP_HOP);
                 E_INFO("%s:%u <===LOCAL(~)=== %s:%u", src_ip_str,
                        ntohs(udph->source), dst_ip_str, ntohs(udph->dest));
                 return NF_ACCEPT;

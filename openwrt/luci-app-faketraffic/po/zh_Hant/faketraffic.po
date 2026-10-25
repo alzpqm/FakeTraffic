@@ -29,3 +29,231 @@ msgstr "已送出服務指令，請以下方 TCP／UDP 實際狀態為準；尚�
 
 msgid "Service command failed"
 msgstr "服務指令執行失敗"
+
+msgid "Processing backend"
+msgstr "封包處理後端"
+
+msgid "Backend"
+msgstr "後端"
+
+msgid "NFQUEUE (current stable path)"
+msgstr "NFQUEUE（目前穩定路徑）"
+
+msgid "eBPF (experimental; requires successful preflight)"
+msgstr "eBPF（實驗性；須先通過預檢）"
+
+msgid "Accept native eBPF semantics"
+msgstr "接受原生 eBPF 的行為差異"
+
+msgid "Compatibility preflight"
+msgstr "相容性預檢"
+
+msgid "Read-only compatibility preflight"
+msgstr "執行唯讀相容性預檢"
+
+msgid "Checks saved settings only, not unsaved form values. No BPF attach or network changes are performed."
+msgstr "只檢查已儲存設定，不含尚未儲存的表單。不掛載 BPF，也不修改網路。"
+
+msgid "Preflight has not been requested."
+msgstr "尚未執行預檢。"
+
+msgid "Preflight unavailable"
+msgstr "無法取得預檢結果"
+
+msgid "Saved configuration only; BPF load/attach is not tested."
+msgstr "僅檢查已儲存設定；尚未驗證 BPF 載入及掛載。"
+
+msgid "May attempt experimental backend"
+msgstr "可嘗試實驗性後端"
+
+msgid "Blockers"
+msgstr "阻擋原因"
+
+msgid "Warnings"
+msgstr "警告"
+
+msgid "Counters unavailable"
+msgstr "無法取得計數器"
+
+msgid "Queued"
+msgstr "進入佇列"
+
+msgid "Fake send attempts"
+msgstr "假包發送嘗試"
+
+msgid "Socket accepted"
+msgstr "本機 socket 已受理"
+
+msgid "Send errors"
+msgstr "發送錯誤"
+
+msgid "Short sends"
+msgstr "不完整發送"
+
+msgid "Verdict errors"
+msgstr "封包判定錯誤"
+
+msgid "Accepted per second"
+msgstr "每秒受理數（估計）"
+
+msgid "Counter saturated; rates unavailable"
+msgstr "計數器已飽和；無法計算速率"
+
+msgid "Counters may overlap; do not sum them as a failure rate."
+msgstr "計數分類可能重疊；不可加總後視為失敗率。"
+
+msgid "Saved backend"
+msgstr "已儲存後端"
+
+msgid "Observed backend"
+msgstr "目前觀測後端"
+
+msgid "Warning: saved and running backends differ; settings may not be applied."
+msgstr "警告：設定與運行後端不同，設定可能尚未套用。"
+
+msgid "Recovery checkpoint present; manual ownership review required. Do not delete it blindly."
+msgstr "存在恢復檢查點，須人工核對資源歸屬，請勿直接刪除。"
+
+msgid "Sampled state; not an atomic or continuous health guarantee."
+msgstr "此為取樣狀態，不代表原子快照或持續健康保證。"
+
+msgid "Socket acceptance is local only; it does not prove remote delivery or DPI effectiveness. Counters reset with each engine instance."
+msgstr "受理數僅表示本機處理，不代表遠端收到或 DPI 偽裝成功。引擎每次啟動均重新計數。"
+
+msgid "Running via eBPF"
+msgstr "經 eBPF 運行中"
+
+msgid "Disabled via eBPF"
+msgstr "已於 eBPF 停用"
+
+msgid "Unknown (backend conflict)"
+msgstr "未知（後端衝突）"
+
+msgid "Unknown (eBPF state incomplete)"
+msgstr "未知（eBPF 狀態資料不完整）"
+
+msgid "No separate NFQUEUE process is expected."
+msgstr "此模式不會另行啟動 NFQUEUE 程序。"
+
+msgid "See shared TCP/UDP eBPF counters below."
+msgstr "發送總數請見下方 TCP／UDP 共用 eBPF 計數器。"
+
+msgid "Observer counts are not per-protocol delivery totals."
+msgstr "觀測計數不代表個別協議已送達的封包數。"
+
+msgid "eBPF shared TCP/UDP counters"
+msgstr "eBPF TCP／UDP 共用計數器"
+
+msgid "TCP payload selection does not disable UDP/SIP. The selected backend handles both enabled protocols."
+msgstr "TCP 偽裝內容選擇不會停用 UDP／SIP。所選後端會處理兩種已啟用的協議。"
+
+msgid "TCP SYN observations"
+msgstr "TCP SYN 觀測數"
+
+msgid "TCP eligible SYN-ACK observations"
+msgstr "TCP 符合條件的 SYN-ACK 觀測數"
+
+msgid "UDP new-flow observations"
+msgstr "UDP 新連線觀測數"
+
+msgid "UDP early-window observations"
+msgstr "UDP 初期視窗觀測數"
+
+msgid "Injection totals and acceptance rates are shared across TCP/UDP, not per-protocol delivery totals."
+msgstr "注入總數與受理速率為 TCP／UDP 共用，不代表個別協議已送達的封包數。"
+
+msgid "Clone attempts"
+msgstr "複製注入嘗試"
+
+msgid "Local clone-path accepted"
+msgstr "本機複製路徑已受理"
+
+msgid "Clone errors"
+msgstr "複製錯誤"
+
+msgid "Builder errors"
+msgstr "封包建立錯誤"
+
+msgid "Rate limited"
+msgstr "速率限制次數"
+
+msgid "GSO skips (overlap possible)"
+msgstr "GSO 略過數（可能重疊）"
+
+msgid "Layout skips (overlap possible)"
+msgstr "封包布局略過數（可能重疊）"
+
+msgid "Request expired"
+msgstr "請求逾時數"
+
+msgid "Runtime overview"
+msgstr "運行概覽"
+
+msgid "One service. TCP and UDP/SIP, together."
+msgstr "一個服務，統一管理 TCP 與 UDP／SIP 偽裝。"
+
+msgid "Live samples every 5 seconds; not a continuous health guarantee."
+msgstr "每 5 秒更新取樣；不代表持續健康保證。"
+
+msgid "TCP camouflage"
+msgstr "TCP 偽裝"
+
+msgid "UDP / SIP camouflage"
+msgstr "UDP／SIP 偽裝"
+
+msgid "Injection activity"
+msgstr "注入活動"
+
+msgid "Shared TCP/UDP"
+msgstr "TCP／UDP 共用"
+
+msgid "Separate NFQUEUE counters"
+msgstr "NFQUEUE 分協議計數"
+
+msgid "Protocol diagnostics"
+msgstr "展開協議診斷"
+
+msgid "Preflight details"
+msgstr "展開預檢詳情"
+
+msgid "Configuration"
+msgstr "設定"
+
+msgid "Saved settings are blocked; the running service has not been changed."
+msgstr "已儲存設定未通過預檢；目前運行中的服務未變更。"
+
+msgid "Saved settings only. A successful preflight does not prove BPF load/attach or apply unsaved edits."
+msgstr "僅檢查已儲存設定。預檢通過不代表 BPF 載入／掛載已驗證，也不會套用未儲存的編輯。"
+
+msgid "eBPF supports 1–16 templates per enabled protocol. Adjust the list or select NFQUEUE before applying."
+msgstr "eBPF 每個啟用的協定支援 1–16 份偽裝範本。套用前請調整清單，或選擇 NFQUEUE。"
+
+msgid "Active templates"
+msgstr "實際運行範本數"
+
+msgid "Saved TCP / UDP templates (limit 16 each)"
+msgstr "已儲存 TCP／UDP 範本數（各上限 16）"
+
+msgid "Recorded engine errors; inspect diagnostics. These are cumulative counters, not a failure rate."
+msgstr "引擎曾記錄錯誤，請展開診斷檢查。這是累計次數，不代表即時失敗率。"
+
+msgid "eBPF UDP trigger"
+msgstr "eBPF UDP 觸發方向"
+
+msgid "Both, after prior egress"
+msgstr "雙向（須先有傳出流量）"
+
+msgid "eBPF interface mode"
+msgstr "eBPF 介面模式"
+
+msgid "Logical PPP / L3 TUN"
+msgstr "邏輯 PPP／第三層 TUN"
+
+msgid "Physical PPPoE"
+msgstr "實體 PPPoE"
+
+msgid "Ethernet"
+msgstr "乙太網路"
+
+msgid "Explicitly accepts changed UDP trigger/window, native loop isolation instead of default NFQUEUE marks, and generated templates. Custom bypass policy and unsupported settings remain blocked."
+msgstr "明確接受 UDP 觸發／視窗的差異、以原生迴路隔離取代預設 NFQUEUE 標記，以及自動生成範本。自訂略過策略與不支援的設定仍會被阻擋。"

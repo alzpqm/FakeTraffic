@@ -1,0 +1,97 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# No arguments, arbitrary paths, shell execution RPC or mutation interface.
+[ "$#" -eq 0 ] || exit 2
+ft_unavailable() { printf '{"available":false,"reason":"%s"}' "$1"; }
+ft_value() { jsonfilter -s "$1" -e "@.$2" 2>/dev/null; }
+ft_decimal() { case "$1" in ''|*[!0-9]*|0[0-9]*) return 1;; esac; [ "${#1}" -le 20 ]; }
+ft_service="$(ubus -t 2 call service list '{"name":"faketraffic"}' 2>/dev/null)" || ft_service=
+ft_uptime="$(cut -d ' ' -f 1 /proc/uptime)"
+ft_now="$(awk -v value="$ft_uptime" 'BEGIN { printf "%.0f", value * 1000 }')"
+ft_decimal "$ft_now" && [ "${#ft_now}" -le 15 ] || { printf '{"schema_version":1,"available":false,"reason":"CLOCK_UNAVAILABLE"}\n'; exit 0; }
+ft_configured="$(uci -q get faketraffic.globals.backend 2>/dev/null)" || ft_configured=nfqueue
+case "$ft_configured" in nfqueue|ebpf) ;; *) ft_configured=unknown;; esac
+ft_actual=stopped
+if [ -z "$ft_service" ]; then ft_actual=unknown
+else
+    ft_nfq=false ft_bpf=false
+    for ft_engine_name in tcp udp; do
+        [ "$(ft_value "$ft_service" "faketraffic.instances.$ft_engine_name.running")" != true ] || ft_nfq=true
+    done
+    [ "$(ft_value "$ft_service" faketraffic.instances.ebpf.running)" != true ] || ft_bpf=true
+    case "$ft_nfq:$ft_bpf" in true:false) ft_actual=nfqueue;; false:true) ft_actual=ebpf;; true:true) ft_actual=conflict;; esac
+fi
+ft_mismatch=false
+ft_recovery=false
+ft_checkpoint_present=false
+for ft_checkpoint in /var/run/faketraffic/ebpf-runtime/filters /var/run/faketraffic/ebpf-runtime/recovery-required; do
+    if [ -e "$ft_checkpoint" ] || [ -L "$ft_checkpoint" ]; then ft_checkpoint_present=true; fi
+done
+[ "$ft_checkpoint_present:$ft_actual" != true:ebpf ] && [ "$ft_checkpoint_present" = true ] && ft_recovery=true
+case "$ft_actual" in nfqueue|ebpf|conflict) [ "$ft_actual" = "$ft_configured" ] || ft_mismatch=true;; esac
+ft_queue() {
+    local number="$1" result
+    ft_decimal "$number" && [ "${#number}" -le 5 ] && [ "$number" -le 65535 ] || { ft_unavailable QUEUE_UNKNOWN; return; }
+    [ -r /proc/net/netfilter/nfnetlink_queue ] || { ft_unavailable QUEUE_TABLE_UNAVAILABLE; return; }
+    result="$(head -c 16384 /proc/net/netfilter/nfnetlink_queue | awk -v queue="$number" '
+        $1 == queue && NF >= 8 { for (i=1;i<=8;i++) if ($i !~ /^[0-9]+$/) exit;
+          printf "{\"available\":true,\"number\":\"%s\",\"backlog\":\"%s\",\"kernel_drops\":\"%s\",\"user_drops\":\"%s\"}", $1,$3,$6,$7; exit }')"
+    if [ -n "$result" ]; then printf '%s' "$result"; else ft_unavailable QUEUE_NOT_FOUND; fi
+}
+ft_engine() {
+    local engine="$1" file raw pid ticks sample actual line exe directory_mode boot
+    file="/var/run/faketraffic/$engine.stats"
+    [ -n "$ft_service" ] || { ft_unavailable SERVICE_QUERY_FAILED; return; }
+    pid="$(ft_value "$ft_service" "faketraffic.instances.$engine.pid")"
+    ft_decimal "$pid" && [ "$pid" != 0 ] || { ft_unavailable NOT_RUNNING; return; }
+    [ ! -L /var/run/faketraffic ] && [ -d /var/run/faketraffic ] || { ft_unavailable NO_SNAPSHOT; return; }
+    directory_mode="$(ls -ldn /var/run/faketraffic 2>/dev/null)"
+    set -- $directory_mode
+    [ "$1:$3" = drwx------:0 ] || { ft_unavailable UNSAFE_SNAPSHOT_DIRECTORY; return; }
+    [ -f "$file" ] && [ ! -L "$file" ] || { ft_unavailable NO_SNAPSHOT; return; }
+    raw="$(head -c 4097 "$file" 2>/dev/null)"
+    [ "${#raw}" -le 4096 ] && [ "$(ft_value "$raw" schema_version)" = 1 ] &&
+    [ "$(ft_value "$raw" backend)" = nfqueue ] && [ "$(ft_value "$raw" engine)" = "$engine" ] &&
+    [ "$(ft_value "$raw" pid)" = "$pid" ] || { ft_unavailable INVALID_SNAPSHOT; return; }
+    ticks="$(ft_value "$raw" start_ticks)"; sample="$(ft_value "$raw" sample_mono_ms)"
+    boot="$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)"
+    [ -n "$boot" ] && [ "$(ft_value "$raw" boot_id)" = "$boot" ] || { ft_unavailable INSTANCE_MISMATCH; return; }
+    ft_decimal "$ticks" && ft_decimal "$sample" || { ft_unavailable INVALID_SNAPSHOT; return; }
+    # Avoid overflowing shell signed arithmetic on malicious/corrupt snapshots.
+    [ "${#sample}" -le 15 ] && [ "${#ft_now}" -le 15 ] || { ft_unavailable INVALID_SNAPSHOT; return; }
+    exe="$(readlink "/proc/$pid/exe" 2>/dev/null)"
+    case "$engine:$exe" in tcp:/usr/libexec/faketraffic/fakehttp|udp:/usr/libexec/faketraffic/fakesip) ;; *) ft_unavailable INSTANCE_MISMATCH; return;; esac
+    line="$(head -c 4096 "/proc/$pid/stat" 2>/dev/null)"
+    actual="$(printf '%s\n' "${line##*) }" | awk '{ print $20 }')"
+    [ "$actual" = "$ticks" ] || { ft_unavailable INSTANCE_MISMATCH; return; }
+    [ "$sample" -le "$ft_now" ] && [ "$((ft_now - sample))" -le 15000 ] || { ft_unavailable STALE_SNAPSHOT; return; }
+    printf '{"available":true,"instance":"%s:%s:%s","snapshot":%s,"queue":' "$boot" "$pid" "$ticks" "$raw"
+    if [ "$(ft_value "$raw" queue_bound)" = true ]; then ft_queue "$(ft_value "$raw" queue_number)"; else ft_unavailable QUEUE_NOT_BOUND; fi
+    printf '}'
+}
+ft_ebpf() {
+    local pid exe raw snapshot boot line ticks
+    [ -n "$ft_service" ] || { ft_unavailable SERVICE_QUERY_FAILED; return; }
+    pid="$(ft_value "$ft_service" faketraffic.instances.ebpf.pid)"
+    ft_decimal "$pid" && [ "$pid" != 0 ] || { ft_unavailable NOT_RUNNING; return; }
+    exe="$(readlink "/proc/$pid/exe" 2>/dev/null)"
+    [ "$exe" = /usr/libexec/faketraffic/ebpf ] || { ft_unavailable INSTANCE_MISMATCH; return; }
+    # The native control client enforces an absolute two-second I/O deadline.
+    raw="$(/usr/libexec/faketraffic/ebpf metrics --runtime-dir /var/run/faketraffic/ebpf-runtime 2>/dev/null | head -c 4097)"
+    [ "${#raw}" -le 4096 ] && [ "$(ft_value "$raw" available)" = true ] &&
+    [ "$(ft_value "$raw" pid)" = "$pid" ] || { ft_unavailable METRICS_QUERY_FAILED; return; }
+    snapshot="$(ft_value "$raw" snapshot)"
+    [ "$(ft_value "$snapshot" backend)" = ebpf ] || { ft_unavailable INVALID_SNAPSHOT; return; }
+    boot="$(cat /proc/sys/kernel/random/boot_id 2>/dev/null)"
+    line="$(head -c 4096 "/proc/$pid/stat" 2>/dev/null)"
+    ticks="$(printf '%s\n' "${line##*) }" | awk '{print $20}')"
+    ft_decimal "$ticks" && [ -n "$boot" ] || { ft_unavailable INSTANCE_MISMATCH; return; }
+    printf '{"available":true,"instance":"%s:%s:%s","snapshot":%s}' "$boot" "$pid" "$ticks" "$snapshot"
+}
+printf '{"schema_version":1,"sample_mono_ms":"%s","configured_backend":"%s","actual_backend":"%s","backend_mismatch":%s,"recovery_required":%s,"tcp":' "$ft_now" "$ft_configured" "$ft_actual" "$ft_mismatch" "$ft_recovery"
+ft_engine tcp
+printf ',"udp":'
+ft_engine udp
+printf ',"ebpf":'
+ft_ebpf
+printf '}\n'

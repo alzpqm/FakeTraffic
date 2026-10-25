@@ -1,7 +1,7 @@
 {
   "luci-app-faketraffic": {
     "description": "Configure FakeTraffic TCP and UDP and control its single service",
-    "read": { "ubus": { "service": [ "list" ] }, "uci": [ "faketraffic" ] },
+    "read": { "ubus": { "service": [ "list" ], "faketraffic": [ "status", "preflight" ] }, "uci": [ "faketraffic" ] },
     "write": {
       "uci": [ "faketraffic" ],
       "file": {

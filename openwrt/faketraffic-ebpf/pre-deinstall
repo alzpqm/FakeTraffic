@@ -1,0 +1,42 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
+# Never remove the executable of a live backend or stop unrelated services.
+set -eu
+[ -n "${IPKG_INSTROOT:-}" ] && exit 0
+# jsonfilter returns 1 both for a missing field and malformed input. Validate
+# the container types first; never turn an unknown service state into "stopped".
+query_pid() {
+    reply="$(ubus -t 2 call service list '{"name":"faketraffic"}')" || return 1
+    [ "$(jsonfilter -s "$reply" -t '@')" = object ] || return 1
+    pid=
+    for field in '@.faketraffic' '@.faketraffic.instances' '@.faketraffic.instances.ebpf'; do
+        type="$(jsonfilter -s "$reply" -t "$field" 2>/dev/null)" || type=
+        [ -n "$type" ] || return 0
+        [ "$type" = object ] || return 1
+    done
+    type="$(jsonfilter -s "$reply" -t '@.faketraffic.instances.ebpf.running' 2>/dev/null)" || type=
+    case "$type" in ''|boolean) ;; *) return 1;; esac
+    running="$(jsonfilter -s "$reply" -e '@.faketraffic.instances.ebpf.running' 2>/dev/null)" || running=
+    type="$(jsonfilter -s "$reply" -t '@.faketraffic.instances.ebpf.pid' 2>/dev/null)" || type=
+    if [ -z "$type" ]; then [ "$running" != true ]; return $?; fi
+    [ "$type" = int ] || return 1
+    pid="$(jsonfilter -s "$reply" -e '@.faketraffic.instances.ebpf.pid')" || return 1
+    case "$pid" in ''|0|*[!0-9]*) return 1;; esac
+    [ "${#pid}" -le 10 ]
+}
+checkpoint_absent() {
+    for file in /var/run/faketraffic/ebpf-runtime/filters /var/run/faketraffic/ebpf-runtime/recovery-required; do
+        [ ! -e "$file" ] && [ ! -L "$file" ] || return 1
+    done
+}
+query_pid || exit 1
+if [ -z "$pid" ]; then checkpoint_absent; exit $?; fi
+[ "$(readlink "/proc/$pid/exe")" = /usr/libexec/faketraffic/ebpf ] || exit 1
+/etc/init.d/faketraffic stop || exit 1
+tries=0
+while [ "$tries" -lt 20 ]; do
+    query_pid || exit 1
+    if [ -z "$pid" ]; then checkpoint_absent; exit $?; fi
+    sleep 1; tries=$((tries+1))
+done
+exit 1

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "patchSet": "faketraffic-0.4.0-multi-template-v2",
+  "description": "Reviewed product changes layered over immutable upstream file hashes; not a repin of original source",
+  "files": {
+    "fakehttp/Makefile": {
+      "baseSHA256": "acc996c9732ae6702746c05f97fdfcd38463d51e389089425c92efac605cb31e",
+      "sha256": "d6a840e185bbe6b431d46ce8850cbdc3711650a2b85aca06ee8e05c42b03380e",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakehttp/src/nfqueue.c": {
+      "baseSHA256": "d68750fbf76c0b83dd6bde6fefbc270d60e0fb460009179b9c41cd9c145f9aab",
+      "sha256": "9dbbc7746fea430c36c016c5476750d4c0a9f993dd72e66246ac4bef6073b67c",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakehttp/src/rawsend.c": {
+      "baseSHA256": "bbdecf57de45dba24d557df509fedf832165b0ea5e7b89f3d0e50bb1138673d1",
+      "sha256": "bd439f647f1a52b850d3750d88b54715ab6ddbcbfb9905f6b31947968d0f172f",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakehttp/src/telemetry.c": {
+      "baseSHA256": null,
+      "sha256": "b03ca005c0a84d46883697be020334670c6634485ffd07f1878feb70c8dc2beb",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakehttp/include/telemetry.h": {
+      "baseSHA256": null,
+      "sha256": "473492b832419aca40336f0fc8dedcda3db02da8df028299a851157b2fba0640",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakesip/src/nfqueue.c": {
+      "baseSHA256": "d4e6f13d369e2452e400ae2d2743ebd1708a92ebe18295a4cb08c9d60e2bb828",
+      "sha256": "0ddb4cc54fea36989b6b9004185592fd8a0ec60c83a6b5e9b85c156c5f670623",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakesip/src/rawsend.c": {
+      "baseSHA256": "501e98dd3b4024d4dd40c175d50f53d82caa695aed2951bd52648de5e454e2e9",
+      "sha256": "b09258b636286c2356120eb5428e21ed179bad2fbffa8792853a79c4cd7da8ed",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakesip/src/telemetry.c": {
+      "baseSHA256": null,
+      "sha256": "b03ca005c0a84d46883697be020334670c6634485ffd07f1878feb70c8dc2beb",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakesip/include/telemetry.h": {
+      "baseSHA256": null,
+      "sha256": "473492b832419aca40336f0fc8dedcda3db02da8df028299a851157b2fba0640",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakesip/tools/core-regression-test.sh": {
+      "baseSHA256": "583251e3576734b86e8a66ab48161e237339c33a8b5fbfd77aa3b5b462328af5",
+      "sha256": "f380771b5a85ae876d28ec3bbf7b920d4a4b1e03174c15277068329e8eb6eff9",
+      "reason": "GPL-3.0-or-later telemetry: local counters, atomic tmpfs export, and regression linkage"
+    },
+    "fakeflow/ebpf/user/attach.c": {
+      "baseSHA256": "60b0093646e64c4576a86bc8e0498c393f936d8cf0b0312d10f13dd9acbe0277",
+      "sha256": "1da6cabb395849367971e6bb31bea4cac5a80b720ca73318ecc10a30c83fa5bc",
+      "reason": "Independent GPL-2.0-only backend: FD-owned nonpersistent TAP/TUN and TCX, absolute bounded control I/O and uint64 metrics"
+    },
+    "fakeflow/ebpf/user/attach.h": {
+      "baseSHA256": "e00b87c8ed39f6675a4ebb7fe0ddf62076232c8136e4931dcf2519809e6fe365",
+      "sha256": "5e6b92e76ce48d34cff3592afe839b99b943d326eeae9f0bc90281509e33afbd",
+      "reason": "Independent GPL-2.0-only backend: FD-owned nonpersistent TAP/TUN and TCX, absolute bounded control I/O and uint64 metrics"
+    },
+    "fakeflow/ebpf/user/main.c": {
+      "baseSHA256": "f06f13a5c9514e305f0764ed6b2f8e0a2d072600b6c7027c50c14aa86e1b5b68",
+      "sha256": "ced6e6b9b019b7c55181cdabd045cb60684cde7af53860dcaa58dff475bad78b",
+      "reason": "Independent GPL-2.0-only backend: FD-owned nonpersistent TAP/TUN and TCX, absolute bounded control I/O and uint64 metrics; GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/user/lifecycle.c": {
+      "baseSHA256": "78a8c507c747adbaf6638262df87ce0cd296b91db84748cf264d9563833d6de0",
+      "sha256": "0d5e94f4dd820f0d204009143f438ddb9403c855133aa1c4f37fb9a0cbc527a8",
+      "reason": "Independent GPL-2.0-only backend: FD-owned TAP/TUN and TCX, bounded control I/O and uint64 metrics; persist newly attached WAN ownership before enabling lease, propagate checkpoint errors, and avoid quiet-refresh rewrites; GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/Makefile": {
+      "baseSHA256": "f37dc40ba938094b17257ded7e30b14c595dcaebbefdc530a976f92579d518d0",
+      "sha256": "d2b80002c1a4085b939bbf0405a8b7a276a0b14b19619e2ad285f77c9ffd9c5d",
+      "reason": "Independent backend-only build targets for the vendored source subset; no standalone service or missing VM harness"
+    },
+    "fakeflow/ebpf/include/abi.h": {
+      "baseSHA256": "e2fdda7430fe9c2a5f7203d540db43bf8dda7b8e62c8b9555e731924a7d069b1",
+      "sha256": "73ddc77b9458ca79160effe7849dfbfd5885e12bd60d06d01eb1c0d3c1479e8b",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/bpf/maps.h": {
+      "baseSHA256": "f70ee07cbbad2efc663b80a7dc617682274e6e43cd746f6ff9d922e105ffe766",
+      "sha256": "8cb4e84ed1c302e9d44329ed4a1c1a563b16fdd711707c3319c11915c5457160",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/bpf/observer.bpf.c": {
+      "baseSHA256": "460ebce39e8e7324d10ebe5e7db298d141a835af7b1bb176bc487d82edfcce96",
+      "sha256": "ccf6c9630a6596648c310763f62409a3bccdeceaa9d647b809eba4c674f1a100",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/bpf/builder.bpf.c": {
+      "baseSHA256": "7f82c0031bbcebb6b04b27db992173bcc6316800ba384d406fe844d9e1d1a418",
+      "sha256": "1542b762091ec73403ad9bac6e84de7dda622f0525ff33ccce1f1ab7cb84cc17",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/user/fakeflow.h": {
+      "baseSHA256": "62a6ade372b4ec5948fe4282a8d43ec1ad0fd7490f17c72d104244186f845a75",
+      "sha256": "e9f7686db9ea8bc72a5744ec807a528474b039d2a60b6d2292e546168f69b120",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/user/config.c": {
+      "baseSHA256": "9aaf3d0fbfe45b43321cd9567d6237dc1be3cc8172cf03ae6b64d6a6acabddad",
+      "sha256": "caeb986c605e5c4bd30d740e79e4c0f588afcbe9d314a96385e474d200c9c3ae",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/ebpf/user/templates.c": {
+      "baseSHA256": "de82bca505889d77415c775c18f78d6888393368ec444d9fb2ebf86d407da1ae",
+      "sha256": "3dc30d4f46e38c2b5be9c4ae14e30a30bb87508531df63097590588b66ef1e44",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    },
+    "fakeflow/tests/config_test.c": {
+      "baseSHA256": "bc46c9e4788a6f18fdee77656ed83abbddc7943a8f1f81bf8a6787f4f729bb99",
+      "sha256": "9705b0c58bab9cca85b5519297cbc01366709cf3856a171cadfe0ffaf29260d0",
+      "reason": "GPL-2.0-only bounded multi-template v2: generation/slot rotation, complete candidate publication, strict parser and regression coverage"
+    }
+  }
+}

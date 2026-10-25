@@ -1,0 +1,34 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Lifetime shared NFQUEUE / exclusive eBPF lock. fd9 survives exec; no unlock
+# gap between the ownership check and the actual packet-processing process.
+set -eu
+kind="${1:-}"; [ "$#" -gt 0 ] || exit 2; shift
+case "$kind" in tcp|udp|ebpf) ;; *) exit 2;; esac
+directory=/var/run/faketraffic
+[ -d "$directory" ] && [ ! -L "$directory" ] || exit 1
+mode="$(ls -ldn "$directory")"
+# Positional expansion below is only metadata from a fixed root-owned directory.
+permissions="${mode%% *}"
+[ "$permissions" = drwx------ ] || exit 1
+[ "$(printf '%s\n' "$mode" | awk '{print $3}')" = 0 ] || exit 1
+lock="$directory/backend.lock"
+if [ ! -e "$lock" ]; then (umask 077; set -C; : > "$lock") 2>/dev/null || true; fi
+[ -f "$lock" ] && [ ! -L "$lock" ] || exit 1
+exec 9<> "$lock"
+if [ "$kind" = ebpf ]; then flock -n -x 9; else flock -n -s 9; fi
+# A previous abnormal BPF exit must not be papered over by another backend.
+[ ! -e "$directory/ebpf-runtime/filters" ] && [ ! -L "$directory/ebpf-runtime/filters" ] || { echo 'RECOVERY_REQUIRED: owned BPF state remains' >&2; exit 1; }
+[ ! -e "$directory/ebpf-runtime/recovery-required" ] && [ ! -L "$directory/ebpf-runtime/recovery-required" ] || { echo 'RECOVERY_REQUIRED: BPF checkpoint remains' >&2; exit 1; }
+if pidof fakeflow ebpf >/dev/null 2>&1; then echo 'Another BPF process is active' >&2; exit 1; fi
+case "$kind" in
+    tcp) export FAKETRAFFIC_STATS=1; exec /usr/libexec/faketraffic/fakehttp "$@";;
+    udp) export FAKETRAFFIC_STATS=1; exec /usr/libexec/faketraffic/fakesip "$@";;
+    ebpf)
+        tables="$(nft list tables)" || exit 1
+        if printf '%s\n' "$tables" | grep -Eq '^table (ip|ip6) (fakehttp|fakesip)$'; then
+            echo 'RECOVERY_REQUIRED: NFQUEUE tables remain' >&2; exit 1
+        fi
+        exec /usr/libexec/faketraffic/ebpf "$@"
+        ;;
+esac

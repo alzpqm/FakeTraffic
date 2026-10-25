@@ -41,6 +41,7 @@
 #include "logging.h"
 #include "rawsend.h"
 #include "signals.h"
+#include "telemetry.h"
 
 static int fd = -1;
 static struct nfq_handle *h = NULL;
@@ -55,6 +56,7 @@ static int set_verdict(struct nfq_q_handle *queue, uint32_t pkt_id,
     errno = 0;
     res = nfq_set_verdict(queue, pkt_id, verdict, data_len, data);
     if (res < 0) {
+        FT_COUNT(FT_VERDICT_ERRORS);
         err = errno;
         EE("ERROR: nfq_set_verdict(): packet=%" PRIu32 ", verdict=%d: %s",
            pkt_id, verdict, err ? strerror(err) : "failure");
@@ -79,8 +81,11 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
     (void) nfmsg;
     (void) data;
 
+    FT_COUNT(FT_QUEUED);
+
     ph = nfq_get_msg_packet_hdr(nfa);
     if (!ph) {
+        FT_COUNT(FT_METADATA_ERRORS);
         EE("ERROR: nfq_get_msg_packet_hdr(): %s", "failure");
         return -1;
     }
@@ -93,6 +98,7 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
     pkt_data = NULL;
     pkt_len = nfq_get_payload(nfa, &pkt_data);
     if (pkt_len < 0 || !pkt_data) {
+        FT_COUNT(FT_METADATA_ERRORS);
         EE("ERROR: nfq_get_payload(): %s", "failure");
         goto ret_accept;
     }
@@ -130,6 +136,7 @@ static int callback(struct nfq_q_handle *qh, struct nfgenmsg *nfmsg,
 
     verdict = fh_rawsend_handle(&sll, pkt_data, pkt_len, &modified);
     if (verdict < 0) {
+        FT_COUNT(FT_ENGINE_ERRORS);
         EE(T(fh_rawsend_handle));
         goto ret_accept;
     }
@@ -273,11 +280,13 @@ int fh_nfq_loop(void)
         return -1;
     }
 
+    ft_stats_queue(g_ctx.nfqnum);
     err_cnt = 0;
     poll_fd.fd = fd;
     poll_fd.events = POLLIN;
 
     while (!g_ctx.exit) {
+        ft_stats_tick("tcp", 0);
         if (err_cnt >= 20) {
             E("too many errors, exiting...");
             ret = -1;
@@ -319,10 +328,12 @@ int fh_nfq_loop(void)
                     continue;
                 case ETIMEDOUT:
                 case ENOBUFS:
+                    FT_COUNT(FT_RECEIVE_ERRORS);
                     err_cnt++;
                     E("ERROR: recv(): %s", strerror(errno));
                     continue;
                 default:
+                    FT_COUNT(FT_RECEIVE_ERRORS);
                     E("ERROR: recv(): %s", strerror(errno));
                     ret = -1;
                     goto free_buff;
@@ -330,6 +341,7 @@ int fh_nfq_loop(void)
         }
 
         if (!recv_len) {
+            FT_COUNT(FT_RECEIVE_ERRORS);
             E("ERROR: recv(): NFQUEUE socket closed");
             ret = -1;
             goto free_buff;
@@ -338,6 +350,7 @@ int fh_nfq_loop(void)
         errno = 0;
         res = nfq_handle_packet(h, buff, recv_len);
         if (res != 0) {
+            FT_COUNT(FT_HANDLE_ERRORS);
             err = errno;
             err_cnt++;
             E("ERROR: nfq_handle_packet(): result=%d, len=%zd: %s", res,
@@ -351,6 +364,7 @@ int fh_nfq_loop(void)
     ret = 0;
 
 free_buff:
+    ft_stats_tick("tcp", 1);
     free(buff);
 
     return ret;

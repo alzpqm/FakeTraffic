@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=faketraffic
-PKG_VERSION:=0.2.0
+PKG_VERSION:=0.4.0
 PKG_RELEASE:=2
 PKG_LICENSE:=GPL-3.0-or-later
 FAKETRAFFIC_SOURCE_DIR?=$(realpath $(CURDIR)/../..)
@@ -11,7 +11,7 @@ define Package/faketraffic
   CATEGORY:=Network
   TITLE:=Integrated TCP and UDP camouflage service
   URL:=https://github.com/alzpqm/FakeTraffic
-  DEPENDS:=+libnetfilter-queue +libnfnetlink +libmnl +kmod-nfnetlink-queue +kmod-nft-queue +nftables-json
+  DEPENDS:=+libnetfilter-queue +libnfnetlink +libmnl +kmod-nfnetlink-queue +kmod-nft-queue +nftables-json +busybox +jsonfilter +ubus
 endef
 
 define Package/faketraffic/conffiles
@@ -35,6 +35,10 @@ define Package/faketraffic/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/fakesip/build/fakesip $(1)/usr/libexec/faketraffic/fakesip
 	$(INSTALL_BIN) ./files/etc/init.d/faketraffic $(1)/etc/init.d/faketraffic
 	$(INSTALL_CONF) ./files/etc/config/faketraffic $(1)/etc/config/faketraffic
+	$(INSTALL_BIN) ./files/usr/libexec/faketraffic/lock-run ./files/usr/libexec/faketraffic/preflight ./files/usr/libexec/faketraffic/status $(1)/usr/libexec/faketraffic/
+	$(INSTALL_DATA) ./files/usr/libexec/faketraffic/preflight-core.sh ./files/usr/libexec/faketraffic/runtime-manager.sh $(1)/usr/libexec/faketraffic/
+	$(INSTALL_DIR) $(1)/usr/libexec/rpcd
+	$(INSTALL_BIN) ./files/usr/libexec/rpcd/faketraffic $(1)/usr/libexec/rpcd/faketraffic
 endef
 
 # Installation deliberately does not enable/start any service.
@@ -45,9 +49,10 @@ endef
 
 define Package/faketraffic/prerm
 #!/bin/sh
-[ -n "$${IPKG_INSTROOT}" ] || /etc/init.d/faketraffic stop
-[ -n "$${IPKG_INSTROOT}" ] || /etc/init.d/faketraffic disable
-exit 0
+[ -n "$${IPKG_INSTROOT}" ] && exit 0
+unset pkgname
+/etc/init.d/faketraffic stop || exit 1
+/etc/init.d/faketraffic disable
 endef
 
 $(eval $(call BuildPackage,faketraffic))

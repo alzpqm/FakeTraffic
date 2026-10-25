@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 [ -n "${IPKG_INSTROOT:-}" ] && exit 0
 [ -x /etc/init.d/faketraffic ] || exit 0
+unset pkgname
 /etc/init.d/faketraffic stop || exit 1
 /etc/init.d/faketraffic disable

@@ -3,6 +3,34 @@
   "suiteVersion": "0.1.0-r1",
   "components": [
     {
+      "name": "fakeflow",
+      "repository": "https://github.com/lilu0826/fake-flow",
+      "commit": "5b8ce2f8d89036d4f8652c05038d74b5b1868741",
+      "version": "0.1.0-r4",
+      "releaseTag": "0.1.0",
+      "license": "GPL-2.0-only",
+      "files": {
+        "LICENSE": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6",
+        "Makefile": "f37dc40ba938094b17257ded7e30b14c595dcaebbefdc530a976f92579d518d0",
+        "config/fakeflow.toml": "aa94c261a9e2f6e301bda05ade2c50501d7e29f30cea26a3da685a70b373555e",
+        "ebpf/bpf/builder.bpf.c": "7f82c0031bbcebb6b04b27db992173bcc6316800ba384d406fe844d9e1d1a418",
+        "ebpf/bpf/maps.h": "f70ee07cbbad2efc663b80a7dc617682274e6e43cd746f6ff9d922e105ffe766",
+        "ebpf/bpf/observer.bpf.c": "460ebce39e8e7324d10ebe5e7db298d141a835af7b1bb176bc487d82edfcce96",
+        "ebpf/bpf/parse.h": "b5ee10ccfe2e3ffe9dc465c9445b85097baa275065f97796033ab0d79062c1b8",
+        "ebpf/bpf/tcp.h": "42f2c01bd21fbb7dc4f545ee22e0b1674647bda6659e01edf0f0501d4148acc3",
+        "ebpf/bpf/udp.h": "8b067a7025c05f1ecf112f48ec34cacf509186a1bd81fae3419f11ff374a8bb9",
+        "ebpf/include/abi.h": "e2fdda7430fe9c2a5f7203d540db43bf8dda7b8e62c8b9555e731924a7d069b1",
+        "ebpf/user/attach.c": "60b0093646e64c4576a86bc8e0498c393f936d8cf0b0312d10f13dd9acbe0277",
+        "ebpf/user/attach.h": "e00b87c8ed39f6675a4ebb7fe0ddf62076232c8136e4931dcf2519809e6fe365",
+        "ebpf/user/config.c": "9aaf3d0fbfe45b43321cd9567d6237dc1be3cc8172cf03ae6b64d6a6acabddad",
+        "ebpf/user/fakeflow.h": "62a6ade372b4ec5948fe4282a8d43ec1ad0fd7490f17c72d104244186f845a75",
+        "ebpf/user/lifecycle.c": "78a8c507c747adbaf6638262df87ce0cd296b91db84748cf264d9563833d6de0",
+        "ebpf/user/main.c": "f06f13a5c9514e305f0764ed6b2f8e0a2d072600b6c7027c50c14aa86e1b5b68",
+        "ebpf/user/templates.c": "de82bca505889d77415c775c18f78d6888393368ec444d9fb2ebf86d407da1ae",
+        "tests/config_test.c": "bc46c9e4788a6f18fdee77656ed83abbddc7943a8f1f81bf8a6787f4f729bb99"
+      }
+    },
+    {
       "name": "fakehttp",
       "repository": "https://github.com/alzpqm/FakeHTTP",
       "commit": "8e5649d07a8a9d1c879370f723f26d13aa82f4b9",

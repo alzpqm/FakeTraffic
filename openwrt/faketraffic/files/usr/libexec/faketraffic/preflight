@@ -1,0 +1,16 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+. /lib/functions.sh
+. /lib/functions/network.sh
+. /usr/libexec/faketraffic/preflight-core.sh
+before="$(sha256sum /etc/config/faketraffic)" || exit 1
+config_load faketraffic || exit 1
+ft_preflight
+after="$(sha256sum /etc/config/faketraffic)" || exit 1
+if [ "$before" != "$after" ]; then ft_error CONFIG_CHANGED_RETRY; ft_compatible=false; fi
+case "${1:-json}" in
+    json) ft_preflight_json;;
+    check) [ "$ft_compatible" = true ];;
+    render) [ "$ft_backend" = ebpf ] && ft_render;;
+    *) exit 2;;
+esac
