@@ -16,7 +16,7 @@ OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設�
 
 目前版本：[**0.4.0-r3**](https://github.com/alzpqm/FakeTraffic/releases/tag/v0.4.0-r3)。
 預編譯 APK 適用於 **OpenWrt 25.12／x86_64**；其他架構或韌體版本需先確認建置與相依相容性。
-請從同一個 Release 下載所需套件及 `SHA256SUMS`，不要混用不同版本。
+以下指令固定下載同一版套件，核對校驗清單與所選 APK 後，再一次安裝。
 
 | 套件 | 用途 |
 | --- | --- |
@@ -27,36 +27,65 @@ OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設�
 套件數不等於服務數：NFQUEUE 使用核心與 LuCI 兩包；eBPF 使用三包，
 但都只管理一個 `faketraffic` 服務、一份設定及同一個 LuCI 頁面。
 
-若三個 APK 都已下載到同一目錄，可一次核對完整校驗清單：
-
-```sh
-sha256sum -c SHA256SUMS
-```
-
-若只下載部分套件，請核對該檔案的 SHA256 與清單對應列；缺少其他檔案不是下載檔案損壞的證據。
 eBPF 另需 Linux 6.6+、TCX 與匹配的系統相依套件，安裝後仍須執行相容性預檢。
 
 ## 首次安裝
 
-以下兩種方式擇一。若已有 FakeTraffic，請先閱讀下方「升級現有安裝」；
+以 root 執行，需有 `curl`、`sha256sum` 及 `awk`。以下兩段擇一複製執行，不需手動下載檔案。
+若已有 FakeTraffic，先閱讀下方「升級現有安裝」並乾淨停止服務，再使用相符指令；
 從獨立舊專案遷移則先看[遷移說明](docs/migration.md)，停用舊服務後才啟動新版。
 
 **使用 NFQUEUE**，安裝核心與 LuCI：
 
 ```sh
-apk add --allow-untrusted ./faketraffic-0.4.0-r3.apk ./luci-app-faketraffic-0.4.0-r3.apk
+(
+set -eu
+if apk info -e faketraffic-ebpf >/dev/null 2>&1; then
+  echo '已安裝 eBPF 套件，請改用下方三包指令。' >&2
+  exit 1
+fi
+work=$(mktemp -d /tmp/faketraffic.XXXXXX)
+trap 'rm -rf "$work"' EXIT
+base=https://github.com/alzpqm/FakeTraffic/releases/download/v0.4.0-r3
+set -- faketraffic-0.4.0-r3.apk luci-app-faketraffic-0.4.0-r3.apk
+curl -fL --retry 2 "$base/SHA256SUMS" -o "$work/SHA256SUMS"
+printf '%s  SHA256SUMS\n' '5101854817bfc2b85b4ef569044a3083f69843eba23c8cbd749ae684d67022f7' > "$work/manifest.sha256"
+(cd "$work" && sha256sum -c manifest.sha256)
+for name in "$@"; do
+  curl -fL --retry 2 "$base/$name" -o "$work/$name"
+  awk -v name="./$name" '$2 == name { print; found++ } END { exit(found != 1) }' "$work/SHA256SUMS" >> "$work/packages.sha256"
+done
+(cd "$work" && sha256sum -c packages.sha256)
+apk update
+(cd "$work" && apk add --allow-untrusted "$@")
+)
 ```
 
 **需要 eBPF**，三個套件在同一筆交易安裝：
 
 ```sh
-apk add --allow-untrusted \
-  ./faketraffic-0.4.0-r3.apk \
-  ./luci-app-faketraffic-0.4.0-r3.apk \
-  ./faketraffic-ebpf-0.4.0-r3.apk
+(
+set -eu
+work=$(mktemp -d /tmp/faketraffic.XXXXXX)
+trap 'rm -rf "$work"' EXIT
+base=https://github.com/alzpqm/FakeTraffic/releases/download/v0.4.0-r3
+set -- faketraffic-0.4.0-r3.apk luci-app-faketraffic-0.4.0-r3.apk faketraffic-ebpf-0.4.0-r3.apk
+curl -fL --retry 2 "$base/SHA256SUMS" -o "$work/SHA256SUMS"
+printf '%s  SHA256SUMS\n' '5101854817bfc2b85b4ef569044a3083f69843eba23c8cbd749ae684d67022f7' > "$work/manifest.sha256"
+(cd "$work" && sha256sum -c manifest.sha256)
+for name in "$@"; do
+  curl -fL --retry 2 "$base/$name" -o "$work/$name"
+  awk -v name="./$name" '$2 == name { print; found++ } END { exit(found != 1) }' "$work/SHA256SUMS" >> "$work/packages.sha256"
+done
+(cd "$work" && sha256sum -c packages.sha256)
+apk update
+(cd "$work" && apk add --allow-untrusted "$@")
+)
 ```
 
 全新安裝不會自動啟用服務或協定，初始後端為 NFQUEUE；安裝 eBPF 套件本身不會自動切換後端。
+目前附件未提供 APK 簽章公鑰，因此使用本次命令的 `--allow-untrusted`，
+並以此頁固定的 SHA256 核對下載內容；這是完整性校驗，不是 APK 來源簽章驗證。
 
 ## 升級現有安裝
 
