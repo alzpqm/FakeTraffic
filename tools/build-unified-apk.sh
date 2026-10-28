@@ -64,22 +64,22 @@ chmod 0600 "$CORE/etc/config/faketraffic"
 # core must, however, stop and disable its own service before deleting files.
 cp "$ROOT/openwrt/faketraffic/pre-deinstall" "$WORK/pre-deinstall"
 chmod 0755 "$WORK/pre-deinstall"
-"$APK" mkpkg --info 'name:faketraffic' --info 'version:0.4.0-r3' \
+"$APK" mkpkg --info 'name:faketraffic' --info 'version:0.4.0-r4' \
   --info 'description:Integrated TCP and UDP camouflage service' --info "arch:$ARCH" \
   --info 'license:GPL-3.0-or-later' --info 'origin:faketraffic' \
   --info 'url:https://github.com/alzpqm/FakeTraffic' --info 'maintainer:Codex <codex@local.invalid>' \
   --info 'depends:libc libnetfilter-queue1 libnfnetlink0 libmnl0 kmod-nfnetlink-queue kmod-nft-queue nftables-json busybox jsonfilter ubus' \
   --script "pre-deinstall:$WORK/pre-deinstall" \
-  --files "$CORE" --output "$OUT/faketraffic-0.4.0-r3.apk"
+  --files "$CORE" --output "$OUT/faketraffic-0.4.0-r4.apk"
 fi
-"$APK" mkpkg --info 'name:luci-app-faketraffic' --info 'version:0.4.0-r3' \
+"$APK" mkpkg --info 'name:luci-app-faketraffic' --info 'version:0.4.0-r4' \
   --info 'description:Unified FakeTraffic TCP and UDP configuration' --info "arch:$ARCH" \
   --info 'license:GPL-3.0-or-later' --info 'origin:faketraffic' \
   --info 'url:https://github.com/alzpqm/FakeTraffic' --info 'maintainer:Codex <codex@local.invalid>' \
-  --info 'depends:luci-base rpcd-mod-file faketraffic=0.4.0-r3' \
-  --files "$LUCI" --output "$OUT/luci-app-faketraffic-0.4.0-r3.apk"
+  --info 'depends:luci-base rpcd-mod-file faketraffic=0.4.0-r4' \
+  --files "$LUCI" --output "$OUT/luci-app-faketraffic-0.4.0-r4.apk"
 for package in $PACKAGES; do
-    "$APK" adbdump "$OUT/$package-0.4.0-r3.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
+    "$APK" adbdump "$OUT/$package-0.4.0-r4.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
 done
 # Preserve older rollback artifacts and include every retained APK in the manifest.
 (cd "$OUT" && sha256sum ./*.apk > SHA256SUMS)

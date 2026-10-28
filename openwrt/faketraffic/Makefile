@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 PKG_NAME:=faketraffic
 PKG_VERSION:=0.4.0
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 PKG_LICENSE:=GPL-3.0-or-later
 FAKETRAFFIC_SOURCE_DIR?=$(realpath $(CURDIR)/../..)
 include $(INCLUDE_DIR)/package.mk

@@ -39,8 +39,11 @@ test('NFQUEUE candidate rejection never stops an existing owner', { skip: proces
   const source=fs.readFileSync(new URL('../openwrt/faketraffic/files/usr/libexec/faketraffic/runtime-manager.sh',import.meta.url),'utf8');
   const script=source+`
 config_load() { :; }
-config_get_bool() { case "$2" in globals) eval "$1=$TCP";; *) eval "$1=$UDP";; esac; }
+config_get_bool() {
+  case "$2.$3" in globals.enabled) eval "$1=$TCP";; main.enabled) eval "$1=$UDP";; *) config_get "$@";; esac
+}
 config_get() {
+  local value="\${4:-}"
   case "$2.$3" in globals.backend) value=nfqueue;; advanced.queue_number) value=$TQ;; main.queue_num) value=$UQ;; esac
   eval "$1=\\$value"
 }
@@ -53,12 +56,12 @@ reload_backend
   const run=values=>spawnSync('sh',['-s'],{encoding:'utf8',input:script,
     env:{...process.env,TCP:'1',UDP:'1',TQ:'512',UQ:'513',...values}});
   for(const values of [{UQ:'512'},{TQ:'-1',UQ:'512'},{UQ:'0512'},
-      {TQ:'65536'},{UQ:'65536'},{UQ:'-1'},{UQ:'bad'},{UQ:''},{UQ:'9999999999999999999999999'}]) {
+      {TQ:'65536'},{UQ:'65536'},{UQ:'0'},{UQ:'-1'},{UQ:'bad'},{UQ:''},{UQ:'9999999999999999999999999'}]) {
     const result=run(values);
     assert.notEqual(result.status,0,JSON.stringify(values));
     assert.equal(result.stdout,'','rejected candidate must preserve old owner');
   }
-  for(const values of [{},{TQ:'-1'},{TQ:'0',UQ:'65535'},{TQ:'65535',UQ:'0'},
+  for(const values of [{},{TQ:'-1'},{TQ:'0',UQ:'65535'},{TQ:'65535',UQ:'1'},
       {TCP:'0',TQ:'bad'},{UDP:'0',UQ:'512'},{TCP:'0',UDP:'0',TQ:'bad',UQ:'bad'}]) {
     const result=run(values);
     assert.equal(result.status,0,result.stderr);

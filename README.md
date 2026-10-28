@@ -14,7 +14,7 @@ OpenWrt 的 TCP 與 UDP／SIP 流量偽裝工具，在同一個 LuCI 頁面設�
 
 ## 下載與需求
 
-目前版本：[**0.4.0-r3**](https://github.com/alzpqm/FakeTraffic/releases/tag/v0.4.0-r3)。
+目前版本：[**0.4.0-r4**](https://github.com/alzpqm/FakeTraffic/releases/tag/v0.4.0-r4)。
 預編譯 APK 適用於 **OpenWrt 25.12／x86_64**；其他架構或韌體版本需先確認建置與相依相容性。
 以下指令固定下載同一版套件，核對校驗清單與所選 APK 後，再一次安裝。
 
@@ -46,10 +46,10 @@ if apk info -e faketraffic-ebpf >/dev/null 2>&1; then
 fi
 work=$(mktemp -d /tmp/faketraffic.XXXXXX)
 trap 'rm -rf "$work"' EXIT
-base=https://github.com/alzpqm/FakeTraffic/releases/download/v0.4.0-r3
-set -- faketraffic-0.4.0-r3.apk luci-app-faketraffic-0.4.0-r3.apk
+base=https://github.com/alzpqm/FakeTraffic/releases/download/v0.4.0-r4
+set -- faketraffic-0.4.0-r4.apk luci-app-faketraffic-0.4.0-r4.apk
 curl -fL --retry 2 "$base/SHA256SUMS" -o "$work/SHA256SUMS"
-printf '%s  SHA256SUMS\n' '5101854817bfc2b85b4ef569044a3083f69843eba23c8cbd749ae684d67022f7' > "$work/manifest.sha256"
+printf '%s  SHA256SUMS\n' '55ebfeaf695493e5f39ed74d71c29b3679da59428f6877ecba9c6335e12729d8' > "$work/manifest.sha256"
 (cd "$work" && sha256sum -c manifest.sha256)
 for name in "$@"; do
   curl -fL --retry 2 "$base/$name" -o "$work/$name"
@@ -68,10 +68,10 @@ apk update
 set -eu
 work=$(mktemp -d /tmp/faketraffic.XXXXXX)
 trap 'rm -rf "$work"' EXIT
-base=https://github.com/alzpqm/FakeTraffic/releases/download/v0.4.0-r3
-set -- faketraffic-0.4.0-r3.apk luci-app-faketraffic-0.4.0-r3.apk faketraffic-ebpf-0.4.0-r3.apk
+base=https://github.com/alzpqm/FakeTraffic/releases/download/v0.4.0-r4
+set -- faketraffic-0.4.0-r4.apk luci-app-faketraffic-0.4.0-r4.apk faketraffic-ebpf-0.4.0-r4.apk
 curl -fL --retry 2 "$base/SHA256SUMS" -o "$work/SHA256SUMS"
-printf '%s  SHA256SUMS\n' '5101854817bfc2b85b4ef569044a3083f69843eba23c8cbd749ae684d67022f7' > "$work/manifest.sha256"
+printf '%s  SHA256SUMS\n' '55ebfeaf695493e5f39ed74d71c29b3679da59428f6877ecba9c6335e12729d8' > "$work/manifest.sha256"
 (cd "$work" && sha256sum -c manifest.sha256)
 for name in "$@"; do
   curl -fL --retry 2 "$base/$name" -o "$work/$name"

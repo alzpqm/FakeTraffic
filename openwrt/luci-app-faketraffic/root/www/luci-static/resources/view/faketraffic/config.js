@@ -124,6 +124,9 @@ return view.extend({
 				return field && field.formvalue(section);
 			}
 			var tq = value('advanced', 'queue_number'), uq = value('main', 'queue_num');
+			if (value('globals', 'enabled') === '1' && value('advanced', 'disable_estimation') === '1' &&
+				Number(value('advanced', 'pct')) > 0)
+				return Promise.reject(new Error(_('Disable dynamic TTL before disabling hop estimation.')));
 			if (value('globals', 'backend') !== 'ebpf' && value('globals', 'enabled') === '1' && value('main', 'enabled') === '1' &&
 				Number(tq == null || tq === '' || tq === '-1' ? 512 : tq) === Number(uq))
 				return Promise.reject(new Error(_('TCP and UDP must use different NFQUEUE numbers.')));

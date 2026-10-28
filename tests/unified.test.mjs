@@ -75,6 +75,20 @@ test('valid separate queues use the single normal parse cycle', async () => {
   const h = harness({ values: { 'globals.enabled': '1', 'main.enabled': '1', 'advanced.queue_number': '-1', 'main.queue_num': '513' } });
   await h.view.render({}); await h.maps[0].parse(); assert.equal(h.maps[0].parsed, 1);
 });
+
+test('TCP hop conflicts are rejected before saved form values change', async () => {
+  const values = { 'globals.enabled': '1', 'advanced.disable_estimation': '1', 'advanced.pct': '50' };
+  const h = harness({ values });
+  await h.view.render({});
+  await assert.rejects(h.maps[0].parse(), /Disable dynamic TTL/);
+  assert.equal(h.maps[0].parsed, 0);
+  values['advanced.pct'] = '-1';
+  await h.maps[0].parse();
+  assert.equal(h.maps[0].parsed, 1);
+  values['advanced.pct'] = '50'; values['globals.enabled'] = '0';
+  await h.maps[0].parse();
+  assert.equal(h.maps[0].parsed, 2, 'disabled protocol does not block saving');
+});
 test('readonly sessions cannot run service actions', async () => {
   const h = harness({ readonly: true }); await h.view.render({}); await h.view.command('restart');
   assert.equal(h.exec.length, 0); assert.ok(h.view.buttons.every(b => b.disabled));

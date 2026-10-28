@@ -44,13 +44,13 @@ find "$STAGE" -type d -exec chmod 0755 {} +
 find "$STAGE" -type f -exec chmod 0644 {} +
 chmod 0755 "$STAGE/usr/libexec/faketraffic/ebpf"
 chmod 0755 "$STAGE/usr/libexec/faketraffic/ebpf-pre-deinstall"
-"$APK" mkpkg --info 'name:faketraffic-ebpf' --info 'version:0.4.0-r3' \
+"$APK" mkpkg --info 'name:faketraffic-ebpf' --info 'version:0.4.0-r4' \
   --info 'description:FD-owned TCX backend for the single FakeTraffic service' --info 'arch:x86_64' \
   --info 'license:GPL-2.0-only' --info 'origin:faketraffic' --info 'url:https://github.com/alzpqm/FakeTraffic' \
   --info 'maintainer:Codex <codex@local.invalid>' \
-  --info 'depends:libc libgcc1 libbpf1 libelf1 zlib ip-full tc-full kmod-sched-bpf kmod-tun faketraffic=0.4.0-r3' \
+  --info 'depends:libc libgcc1 libbpf1 libelf1 zlib ip-full tc-full kmod-sched-bpf kmod-tun faketraffic=0.4.0-r4' \
   --script "pre-deinstall:$ROOT/openwrt/faketraffic-ebpf/pre-deinstall" \
-  --files "$STAGE" --output "$OUT/faketraffic-ebpf-0.4.0-r3.apk"
-"$APK" adbdump "$OUT/faketraffic-ebpf-0.4.0-r3.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
+  --files "$STAGE" --output "$OUT/faketraffic-ebpf-0.4.0-r4.apk"
+"$APK" adbdump "$OUT/faketraffic-ebpf-0.4.0-r4.apk" | node "$ROOT/tools/check-unified-metadata.mjs"
 (cd "$OUT" && sha256sum ./*.apk > SHA256SUMS)
 printf 'Private eBPF build work retained: %s\n' "$WORK"
